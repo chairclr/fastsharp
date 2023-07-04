@@ -3,11 +3,11 @@ using Silk.NET.Windowing;
 
 namespace FastSharp.Providers;
 
-internal static class D3D11PRovider
+internal static class D3D11Provider
 {
     public static D3D11 D3D11 { get; private set; }
 
-    static D3D11PRovider()
+    static D3D11Provider()
     {
 #pragma warning disable CS0618 // Type or member is obsolete
         D3D11 = D3D11.GetApi();

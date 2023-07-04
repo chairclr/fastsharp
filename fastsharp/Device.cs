@@ -17,7 +17,7 @@ public partial class Device : IDisposable
     {
         SilkMarshal.ThrowHResult
         (
-            D3D11PRovider.D3D11.CreateDevice
+            D3D11Provider.D3D11.CreateDevice
             (
                 pAdapter: default(ComPtr<IDXGIAdapter>),
                 DriverType: D3DDriverType.Hardware,
