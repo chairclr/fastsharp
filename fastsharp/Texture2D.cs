@@ -5,17 +5,15 @@ using Silk.NET.DXGI;
 
 namespace FastSharp;
 
-public unsafe class Texture2D : IDisposable, IMappableResource
+public unsafe class Texture2D : Texture<ID3D11Texture2D>, IDisposable, IMappableResource
 {
     public readonly Device Device;
 
-    public readonly int Width;
+    public readonly int Width = 0;
 
-    public readonly int Height;
+    public readonly int Height = 0;
 
-    internal ComPtr<ID3D11Texture2D> GraphicsTexture;
-
-    private bool Disposed;
+    private bool IsMapped = false;
 
     public Texture2D(Device device, int width, int height)
     {
@@ -39,28 +37,37 @@ public unsafe class Texture2D : IDisposable, IMappableResource
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, (SubresourceData*)null, ref GraphicsTexture));
     }
 
-    public Span<T> MapWrite<T>(Span<T> span) where T : unmanaged
+    public Span<T> MapWrite<T>(int subresource = 0) where T : unmanaged
     {
         throw new NotImplementedException();
     }
 
-    public ReadOnlySpan<T> MapRead<T>(Span<T> span) where T : unmanaged
+    public ReadOnlySpan<T> MapRead<T>(int subresource = 0) where T : unmanaged
     {
-        throw new NotImplementedException();
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!Disposed)
+        if (subresource < 0)
         {
-
-            Disposed = true;
+            throw new ArgumentOutOfRangeException(nameof(subresource), "subresource must be positive");
         }
+
+        MappedSubresource mappedSubresource = default;
+
+        int hr = Device.GraphicsDeviceContext.Map(GraphicsTexture, (uint)subresource, Map.Read, 0, ref mappedSubresource);
+
+        if (!HResult.IndicatesSuccess(hr))
+        {
+            throw new Exception("Failed to map subresource");
+        }
+
+        IsMapped = true;
+
+        return new ReadOnlySpan<T>(mappedSubresource.PData, Width * Height);
     }
 
-    public void Dispose()
+    public void Unmap(int subresource = 0)
     {
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
+        if (!IsMapped)
+            return;
+
+        Device.GraphicsDeviceContext.Unmap(GraphicsTexture, (uint)subresource);
     }
 }
