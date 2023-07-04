@@ -5,7 +5,7 @@ using Silk.NET.DXGI;
 
 namespace FastSharp;
 
-public class Device : IDisposable
+public partial class Device : IDisposable
 {
     internal ComPtr<ID3D11Device> GraphicsDevice;
 
