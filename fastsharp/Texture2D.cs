@@ -13,6 +13,8 @@ public unsafe class Texture2D : Texture<ID3D11Texture2D>, IDisposable, IMappable
 
     public readonly int Height = 0;
 
+    public readonly Format Format = Format.FormatUnknown;
+
     public Texture2D(Device device, int width, int height)
     {
         Device = device;
@@ -31,6 +33,32 @@ public unsafe class Texture2D : Texture<ID3D11Texture2D>, IDisposable, IMappable
             BindFlags = (uint)BindFlag.UnorderedAccess,
             Format = Format.FormatR8G8B8A8Unorm
         };
+
+        Format = desc.Format;
+
+        SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, (SubresourceData*)null, ref GraphicsTexture));
+    }
+
+    public Texture2D(Device device, int width, int height, Format format)
+    {
+        Device = device;
+
+        Width = width;
+
+        Height = height;
+
+        Texture2DDesc desc = new Texture2DDesc()
+        {
+            Width = (uint)width,
+            Height = (uint)height,
+            Usage = Usage.Default,
+            SampleDesc = new SampleDesc(1, 0),
+            ArraySize = 1,
+            BindFlags = (uint)BindFlag.UnorderedAccess,
+            Format = format
+        };
+
+        Format = desc.Format;
 
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, (SubresourceData*)null, ref GraphicsTexture));
     }
