@@ -63,6 +63,8 @@ public class Device : IDisposable
 
     }
 
+
+
     protected virtual void Dispose(bool disposing)
     {
         if (!Disposed)
