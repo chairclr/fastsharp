@@ -5,6 +5,8 @@ VisualStudioVersion = 17.6.33815.320
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fastsharp", "fastsharp\fastsharp.csproj", "{1A6FE102-74E3-4C13-919E-592F3ECF06B7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fastsharp.TestProject", "fastsharp.TestProject\fastsharp.TestProject.csproj", "{CBC7FE3D-FA5B-447D-A613-36D4DC9A2651}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{1A6FE102-74E3-4C13-919E-592F3ECF06B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A6FE102-74E3-4C13-919E-592F3ECF06B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A6FE102-74E3-4C13-919E-592F3ECF06B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBC7FE3D-FA5B-447D-A613-36D4DC9A2651}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBC7FE3D-FA5B-447D-A613-36D4DC9A2651}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBC7FE3D-FA5B-447D-A613-36D4DC9A2651}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBC7FE3D-FA5B-447D-A613-36D4DC9A2651}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

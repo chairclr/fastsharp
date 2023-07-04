@@ -55,6 +55,8 @@ public class Device : IDisposable
             }
 
             Console.WriteLine($"[{x.Severity}] {SilkMarshal.PtrToString((nint)x.PDescription)}");
+
+            Console.ResetColor();
         });
 #endif
 
