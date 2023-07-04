@@ -17,8 +17,15 @@ public class ComputeShader : Shader<ID3D11ComputeShader>
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateComputeShader(ShaderData.GraphicsBlob.GetBufferPointer(), ShaderData.Size, ref Unsafe.NullRef<ID3D11ClassLinkage>(), ref GraphicsShader));
     }
 
-    public override unsafe void Bind()
+    internal override unsafe void Bind()
     {
         Device.GraphicsDeviceContext.CSSetShader(GraphicsShader, (ID3D11ClassInstance*)null, 0);
+    }
+
+    public void Dispatch(uint threadGroupCountX, uint threadGroupCountY, uint threadGroupCountZ)
+    {
+        Bind();
+
+        Device.GraphicsDeviceContext.Dispatch(threadGroupCountX, threadGroupCountY, threadGroupCountZ);
     }
 }

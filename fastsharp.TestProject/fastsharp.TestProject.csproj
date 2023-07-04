@@ -12,4 +12,10 @@
     <ProjectReference Include="..\fastsharp\fastsharp.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Shaders\TestComputeShader.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

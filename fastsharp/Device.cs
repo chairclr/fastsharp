@@ -1,4 +1,5 @@
 ﻿using FastSharp.Providers;
+using FastSharp.Shaders;
 using Silk.NET.Core.Native;
 using Silk.NET.Direct3D11;
 using Silk.NET.DXGI;
@@ -62,8 +63,6 @@ public partial class Device : IDisposable
 
 
     }
-
-
 
     protected virtual void Dispose(bool disposing)
     {
