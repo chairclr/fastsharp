@@ -13,8 +13,6 @@ public unsafe class Texture2D : Texture<ID3D11Texture2D>, IDisposable, IMappable
 
     public readonly int Height = 0;
 
-    private bool IsMapped = false;
-
     public Texture2D(Device device, int width, int height)
     {
         Device = device;
@@ -58,16 +56,11 @@ public unsafe class Texture2D : Texture<ID3D11Texture2D>, IDisposable, IMappable
             throw new Exception("Failed to map subresource");
         }
 
-        IsMapped = true;
-
         return new ReadOnlySpan<T>(mappedSubresource.PData, Width * Height);
     }
 
     public void Unmap(int subresource = 0)
     {
-        if (!IsMapped)
-            return;
-
         Device.GraphicsDeviceContext.Unmap(GraphicsTexture, (uint)subresource);
     }
 }
