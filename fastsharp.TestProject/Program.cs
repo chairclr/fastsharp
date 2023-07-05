@@ -21,14 +21,21 @@ internal class Program
 
         using ComputeShader computeShader = device.CompileShaderFromFile<ComputeShader>("Shaders/TestComputeShader.hlsl", "CSMain", ShaderProfile.CS5_0);
 
-        using Texture2D texture = device.CreateTexture2D(1024, 1024);
+        using Texture2D texture = device.CreateUnorderedAccessTexture2D(1024, 1024);
         using Texture2D stagingTexture = device.CreateStagingCopy(texture);
+
+        using Texture2D immutableTexture = device.CreateImmutableTexture2D(2, 2, new Rgba32[] 
+        {
+            new Rgba32(1.0f, 0.0f, 0.0f), new Rgba32(0.0f, 1.0f, 1.0f),
+            new Rgba32(0.0f, 1.0f, 0.0f), new Rgba32(1.0f, 0.0f, 1.0f),
+        });
 
         // Calculate number of thread groups to process entire image
         int x = (int)Math.Ceiling(texture.Width / 16f);
         int y = (int)Math.Ceiling(texture.Height / 16f);
 
-        computeShader.SetUnorderedAccessView(0, texture);
+        computeShader.SetShaderResource(0, immutableTexture);
+        computeShader.SetUnorderedAccess(0, texture);
         computeShader.Dispatch((uint)x, (uint)y, 1);
 
         texture.CopyTo(stagingTexture);

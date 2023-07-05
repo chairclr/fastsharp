@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Silk.NET.Core.Native;
+﻿using Silk.NET.Core.Native;
 using Silk.NET.Direct3D11;
 using Silk.NET.DXGI;
 
@@ -20,12 +19,26 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
     {
         get
         {
-            if (Unsafe.IsNullRef(ref GraphicsUAVCache.Get()))
+            if (GraphicsUAVCache.IsNull())
             {
                 GraphicsUAVCache = CreateUAV();
             }
 
             return ref GraphicsUAVCache;
+        }
+    }
+
+    protected ComPtr<ID3D11ShaderResourceView> GraphicsSRVCache;
+    internal ref ComPtr<ID3D11ShaderResourceView> GraphicsSRV
+    {
+        get
+        {
+            if (GraphicsSRVCache.IsNull())
+            {
+                GraphicsSRVCache = CreateSRV();
+            }
+
+            return ref GraphicsSRVCache;
         }
     }
 
@@ -53,6 +66,26 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateUnorderedAccessView(GraphicsResource, unorderedAccessViewDesc, ref accessView));
 
         return accessView;
+    }
+
+    private ComPtr<ID3D11ShaderResourceView> CreateSRV()
+    {
+        ComPtr<ID3D11ShaderResourceView> resourceView = default;
+
+        ShaderResourceViewDesc shaderResourceViewDesc = new ShaderResourceViewDesc()
+        {
+            Format = Format,
+        };
+
+        if (this is Texture2D)
+        {
+            shaderResourceViewDesc.ViewDimension = D3DSrvDimension.D3D101SrvDimensionTexture2D;
+            shaderResourceViewDesc.Texture2D.MipLevels = uint.MaxValue;
+        }
+
+        SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateShaderResourceView(GraphicsResource, shaderResourceViewDesc, ref resourceView));
+
+        return resourceView;
     }
 
     public void CopyTo(Texture texture)

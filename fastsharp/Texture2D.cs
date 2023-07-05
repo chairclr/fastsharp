@@ -1,4 +1,6 @@
-﻿using Silk.NET.Core.Native;
+﻿using System.Runtime.CompilerServices;
+using CommunityToolkit.HighPerformance;
+using Silk.NET.Core.Native;
 using Silk.NET.Direct3D11;
 using Silk.NET.DXGI;
 
@@ -15,47 +17,70 @@ public unsafe class Texture2D : Texture<ID3D11Texture2D>
     internal Texture2D(Device device, Texture2DDesc desc)
         : base(device)
     {
-        SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, (SubresourceData*)null, ref GraphicsTexture));
-
         CacheDescriptionFields(desc);
+
+        SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, (SubresourceData*)null, ref GraphicsTexture));
     }
 
-    public Texture2D(Device device, int width, int height)
+    internal Texture2D(Device device, Texture2DDesc desc, Span<byte> initialData)
+        : base(device)
+    {
+        CacheDescriptionFields(desc);
+
+        SubresourceData subresourceData = new SubresourceData()
+        {
+            PSysMem = Unsafe.AsPointer(ref initialData.DangerousGetReference())
+        };
+
+        SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, subresourceData, ref GraphicsTexture));
+    }
+
+    public Texture2D(Device device, int width, int height, Format format = Format.FormatR8G8B8A8Unorm, Usage usage = Usage.Default, BindFlag bindFlag = BindFlag.UnorderedAccess, CpuAccessFlag cpuAccessFlag = CpuAccessFlag.None)
         : base(device)
     {
         Texture2DDesc desc = new Texture2DDesc()
         {
             Width = (uint)width,
             Height = (uint)height,
-            Usage = Usage.Default,
+            Usage = usage,
             SampleDesc = new SampleDesc(1, 0),
             ArraySize = 1,
-            BindFlags = (uint)BindFlag.UnorderedAccess,
-            Format = Format.FormatR8G8B8A8Unorm,
+            BindFlags = (uint)bindFlag,
+            Format = format,
+            CPUAccessFlags = (uint)cpuAccessFlag,
+            MipLevels = 1
         };
 
-        SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, (SubresourceData*)null, ref GraphicsTexture));
-
         CacheDescriptionFields(desc);
+
+        SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, (SubresourceData*)null, ref GraphicsTexture));
     }
 
-    public Texture2D(Device device, int width, int height, Format format)
+    public Texture2D(Device device, int width, int height, Span<byte> initialData, Format format = Format.FormatR8G8B8A8Unorm, Usage usage = Usage.Default, BindFlag bindFlag = BindFlag.UnorderedAccess, CpuAccessFlag cpuAccessFlag = CpuAccessFlag.None)
         : base(device)
     {
         Texture2DDesc desc = new Texture2DDesc()
         {
             Width = (uint)width,
             Height = (uint)height,
-            Usage = Usage.Default,
+            Usage = usage,
             SampleDesc = new SampleDesc(1, 0),
             ArraySize = 1,
-            BindFlags = (uint)BindFlag.UnorderedAccess,
-            Format = format
+            BindFlags = (uint)bindFlag,
+            Format = format,
+            CPUAccessFlags = (uint)cpuAccessFlag,
+            MipLevels = 1
         };
 
-        SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, (SubresourceData*)null, ref GraphicsTexture));
-
         CacheDescriptionFields(desc);
+
+        SubresourceData subresourceData = new SubresourceData()
+        {
+            PSysMem = Unsafe.AsPointer(ref initialData.DangerousGetReference()),
+            SysMemPitch = (uint)Width,
+        };
+
+        SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, subresourceData, ref GraphicsTexture));
     }
 
     internal Texture2DDesc GetTextureDescription()
@@ -86,9 +111,9 @@ public unsafe class Texture2D : Texture<ID3D11Texture2D>
         {
             Usage = Usage.Staging,
             CPUAccessFlags = (uint)CpuAccessFlag.Read,
-            MipLevels = 0,
+            MipLevels = 1,
             BindFlags = (uint)BindFlag.None,
-            SampleDesc = new SampleDesc(1, 0)
+            SampleDesc = new SampleDesc(1, 0),
         };
 
 

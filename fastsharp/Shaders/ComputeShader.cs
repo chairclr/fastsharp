@@ -29,8 +29,13 @@ public class ComputeShader : Shader<ID3D11ComputeShader>
         Device.GraphicsDeviceContext.Dispatch(threadGroupCountX, threadGroupCountY, threadGroupCountZ);
     }
 
-    public unsafe void SetUnorderedAccessView(int slot, Texture texture)
+    public unsafe void SetUnorderedAccess(int slot, Texture texture)
     {
         Device.GraphicsDeviceContext.CSSetUnorderedAccessViews((uint)slot, 1, texture.GraphicsUAV, (uint*)null);
+    }
+
+    public unsafe void SetShaderResource(int slot, Texture texture)
+    {
+        Device.GraphicsDeviceContext.CSSetShaderResources((uint)slot, 1, texture.GraphicsSRV);
     }
 }
