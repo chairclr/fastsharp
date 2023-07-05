@@ -1,4 +1,5 @@
 ﻿RWTexture2D<unorm float4> TestTexture : register(u0);
+RWTexture1D<unorm float4> Test1DTexture : register(u1);
 Texture2D<unorm float4> TestSRV : register (t0);
 
 [numthreads(16, 16, 1)]
@@ -13,4 +14,5 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float4 color = TestSRV.Load(coords);
     
     TestTexture[id.xy] = color;
+    Test1DTexture[id.x + id.y] = color;
 }

@@ -58,7 +58,11 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
             Format = Format
         };
 
-        if (this is Texture2D)
+        if (this is Texture1D)
+        {
+            unorderedAccessViewDesc.ViewDimension = UavDimension.Texture1D;
+        }
+        else if (this is Texture2D)
         {
             unorderedAccessViewDesc.ViewDimension = UavDimension.Texture2D;
         }
@@ -77,7 +81,12 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
             Format = Format,
         };
 
-        if (this is Texture2D)
+        if (this is Texture1D)
+        {
+            shaderResourceViewDesc.ViewDimension = D3DSrvDimension.D3D101SrvDimensionTexture1D;
+            shaderResourceViewDesc.Texture1D.MipLevels = uint.MaxValue;
+        }
+        else if (this is Texture2D)
         {
             shaderResourceViewDesc.ViewDimension = D3DSrvDimension.D3D101SrvDimensionTexture2D;
             shaderResourceViewDesc.Texture2D.MipLevels = uint.MaxValue;

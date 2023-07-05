@@ -30,12 +30,15 @@ internal class Program
             new Rgba32(0.0f, 1.0f, 0.0f), new Rgba32(1.0f, 0.0f, 1.0f),
         });
 
+        using Texture1D cool1DTexture = device.CreateUnorderedAccessTexture1D(2048);
+
         // Calculate number of thread groups to process entire image
         int x = (int)Math.Ceiling(texture.Width / 16f);
         int y = (int)Math.Ceiling(texture.Height / 16f);
 
         computeShader.SetShaderResource(0, immutableTexture);
         computeShader.SetUnorderedAccess(0, texture);
+        computeShader.SetUnorderedAccess(1, cool1DTexture);
         computeShader.Dispatch((uint)x, (uint)y, 1);
 
         texture.CopyTo(stagingTexture);
