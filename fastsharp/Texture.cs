@@ -13,8 +13,9 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
 
     protected abstract int Size { get; }
 
-    protected ComPtr<ID3D11UnorderedAccessView> GraphicsUAVCache;
+    protected abstract ComPtr<ID3D11Resource> GraphicsResource { get; }
 
+    protected ComPtr<ID3D11UnorderedAccessView> GraphicsUAVCache;
     internal ref ComPtr<ID3D11UnorderedAccessView> GraphicsUAV
     {
         get
@@ -27,8 +28,6 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
             return ref GraphicsUAVCache;
         }
     }
-
-    protected abstract ComPtr<ID3D11Resource> GraphicsResource { get; }
 
     private bool Disposed;
 
@@ -97,6 +96,25 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
         }
 
         return new ReadOnlySpan<T>(mappedSubresource.PData, Size);
+    }
+
+    public Span<T> MapReadWrite<T>(int subresource = 0) where T : unmanaged
+    {
+        if (subresource < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(subresource), "subresource must be positive");
+        }
+
+        MappedSubresource mappedSubresource = default;
+
+        int hr = Device.GraphicsDeviceContext.Map(GraphicsResource, (uint)subresource, Map.ReadWrite, 0, ref mappedSubresource);
+
+        if (!HResult.IndicatesSuccess(hr))
+        {
+            throw new Exception("Failed to map subresource");
+        }
+
+        return new Span<T>(mappedSubresource.PData, Size);
     }
 
     public void Unmap(int subresource = 0)
