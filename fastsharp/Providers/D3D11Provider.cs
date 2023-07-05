@@ -8,8 +8,6 @@ internal static class D3D11Provider
 
     static D3D11Provider()
     {
-#pragma warning disable CS0618 // Type or member is obsolete
-        D3D11 = D3D11.GetApi();
-#pragma warning restore CS0618
+        D3D11 = D3D11.GetApi(null);
     }
 }
