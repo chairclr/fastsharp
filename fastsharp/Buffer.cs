@@ -24,7 +24,7 @@ public abstract class Buffer : IDisposable
     {
         if (!Disposed)
         {
-
+            GraphicsBuffer.Dispose();
 
             Disposed = true;
         }
