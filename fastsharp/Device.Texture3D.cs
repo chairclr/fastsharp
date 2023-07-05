@@ -17,17 +17,17 @@ public partial class Device
         return new Texture3D(this, width, height, depth, MemoryMarshal.AsBytes(initialData), format, usage, bindFlag, cpuAccessFlag);
     }
 
-    public Texture3D CreateUnorderedAccessTexture3D(int width, int height, int depth)
+    public Texture3D CreateRWTexture3D(int width, int height, int depth)
     {
         return new Texture3D(this, width, height, depth, bindFlag: BindFlag.UnorderedAccess);
     }
 
-    public Texture3D CreateUnorderedAccessTexture3D(int width, int height, int depth, Span<Rgba32> data)
+    public Texture3D CreateRWTexture3D(int width, int height, int depth, Span<Rgba32> data)
     {
         return new Texture3D(this, width, height, depth, MemoryMarshal.AsBytes(data), bindFlag: BindFlag.UnorderedAccess);
     }
 
-    public Texture3D CreateUnorderedAccessTexture3D<T>(int width, int height, int depth, Format format, Span<T> data)
+    public Texture3D CreateRWTexture3D<T>(int width, int height, int depth, Format format, Span<T> data)
         where T : unmanaged
     {
         return new Texture3D(this, width, height, depth, MemoryMarshal.AsBytes(data), format: format, bindFlag: BindFlag.UnorderedAccess);

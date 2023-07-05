@@ -17,17 +17,17 @@ public partial class Device
         return new Texture1D(this, length, MemoryMarshal.AsBytes(initialData), format, usage, bindFlag, cpuAccessFlag);
     }
 
-    public Texture1D CreateUnorderedAccessTexture1D(int length)
+    public Texture1D CreateRWTexture1D(int length)
     {
         return new Texture1D(this, length, bindFlag: BindFlag.UnorderedAccess);
     }
 
-    public Texture1D CreateUnorderedAccessTexture1D(int length, Span<Rgba32> data)
+    public Texture1D CreateRWTexture1D(int length, Span<Rgba32> data)
     {
         return new Texture1D(this, length, MemoryMarshal.AsBytes(data), bindFlag: BindFlag.UnorderedAccess);
     }
 
-    public Texture1D CreateUnorderedAccessTexture1D<T>(int length, Format format, Span<T> data)
+    public Texture1D CreateRWTexture1D<T>(int length, Format format, Span<T> data)
         where T : unmanaged
     {
         return new Texture1D(this, length, MemoryMarshal.AsBytes(data), format: format, bindFlag: BindFlag.UnorderedAccess);
