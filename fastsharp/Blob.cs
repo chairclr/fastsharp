@@ -18,6 +18,17 @@ public class Blob : IDisposable
         return SilkMarshal.PtrToString((nint)GraphicsBlob.GetBufferPointer());
     }
 
+    public unsafe Span<byte> AsSpan()
+    {
+        return new Span<byte>(GraphicsBlob.GetBufferPointer(), (int)Size);
+    }
+
+    public unsafe Span<T> AsSpan<T>()
+        where T : unmanaged
+    {
+        return new Span<T>(GraphicsBlob.GetBufferPointer(), (int)Size);
+    }
+
     protected virtual void Dispose(bool disposing)
     {
         if (!Disposed)
