@@ -56,59 +56,60 @@ internal unsafe static partial class RenderDocUtil
     private static partial nint GetProcAddress(nint hModule, string procName);
 
     [StructLayout(LayoutKind.Sequential)]
-    private struct RENDERDOC_API_1_1_2
+    private readonly struct RENDERDOC_API_1_1_2
     {
-        nint GetAPIVersion;
+        private readonly nint GetAPIVersion;
 
-        nint SetCaptureOptionU32;
+        private readonly nint SetCaptureOptionU32;
 
-        nint SetCaptureOptionF32;
+        private readonly nint SetCaptureOptionF32;
 
-        nint GetCaptureOptionU32;
+        private readonly nint GetCaptureOptionU32;
 
-        nint GetCaptureOptionF32;
+        private readonly nint GetCaptureOptionF32;
 
-        nint SetFocusToggleKeys;
+        private readonly nint SetFocusToggleKeys;
 
-        nint SetCaptureKeys;
+        private readonly nint SetCaptureKeys;
 
-        nint GetOverlayBits;
+        private readonly nint GetOverlayBits;
 
-        nint MaskOverlayBits;
+        private readonly nint MaskOverlayBits;
 
-        nint RemoveHooks;
+        private readonly nint RemoveHooks;
 
-        nint UnloadCrashHandler;
+        private readonly nint UnloadCrashHandler;
 
-        nint SetCaptureFilePathTemplate;
+        private readonly nint SetCaptureFilePathTemplate;
 
-        nint GetCaptureFilePathTemplate;
+        private readonly nint GetCaptureFilePathTemplate;
 
-        nint GetNumCaptures;
-        nint GetCapture;
+        private readonly nint GetNumCaptures;
 
-        nint TriggerCapture;
+        private readonly nint GetCapture;
 
-        nint IsTargetControlConnected;
+        private readonly nint TriggerCapture;
 
-        nint LaunchReplayUI;
+        private readonly nint IsTargetControlConnected;
 
-        nint SetActiveWindow;
+        private readonly nint LaunchReplayUI;
 
-        public delegate* unmanaged[Cdecl]<nint, nint, void> StartFrameCapture;
+        private readonly nint SetActiveWindow;
 
-        public delegate* unmanaged[Cdecl]<uint> IsFrameCapturing;
+        public readonly delegate* unmanaged[Cdecl]<nint, nint, void> StartFrameCapture;
 
-        public delegate* unmanaged[Cdecl]<nint, nint, void> EndFrameCapture;
+        public readonly delegate* unmanaged[Cdecl]<uint> IsFrameCapturing;
 
-        nint TriggerMultiFrameCapture;
+        public readonly delegate* unmanaged[Cdecl]<nint, nint, void> EndFrameCapture;
 
-        nint SetCaptureFileComments;
+        private readonly nint TriggerMultiFrameCapture;
 
-        nint DiscardFrameCapture;
+        private readonly nint SetCaptureFileComments;
 
-        nint ShowReplayUI;
+        private readonly nint DiscardFrameCapture;
 
-        nint SetCaptureTitle;
+        private readonly nint ShowReplayUI;
+
+        private readonly nint SetCaptureTitle;
     }
 }

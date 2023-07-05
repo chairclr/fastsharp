@@ -119,6 +119,11 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
 
     public void Unmap(int subresource = 0)
     {
+        if (subresource < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(subresource), "subresource must be positive");
+        }
+
         Device.GraphicsDeviceContext.Unmap(GraphicsResource, (uint)subresource);
     }
 
