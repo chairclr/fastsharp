@@ -1,8 +1,4 @@
-﻿using System.Reflection;
-using System.Runtime.CompilerServices;
-using CommunityToolkit.HighPerformance.Helpers;
-using FastSharp.Shaders;
-using Silk.NET.DXGI;
+﻿using FastSharp.Shaders;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace FastSharp.TestProject;

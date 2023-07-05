@@ -1,6 +1,6 @@
-﻿using Silk.NET.Core.Native;
+﻿using System.Runtime.CompilerServices;
+using Silk.NET.Core.Native;
 using Silk.NET.Direct3D11;
-using System.Runtime.CompilerServices;
 
 namespace FastSharp.Shaders;
 

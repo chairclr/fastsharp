@@ -63,7 +63,7 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
 
     public Span<T> MapWrite<T>(int subresource = 0) where T : unmanaged
     {
-        if(subresource < 0)
+        if (subresource < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(subresource), "subresource must be positive");
         }

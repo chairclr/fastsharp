@@ -1,5 +1,4 @@
 ﻿using FastSharp.Providers;
-using FastSharp.Shaders;
 using Silk.NET.Core.Native;
 using Silk.NET.Direct3D11;
 using Silk.NET.DXGI;
@@ -66,11 +65,6 @@ public partial class Device : IDisposable
     {
         if (!Disposed)
         {
-            if (disposing)
-            {
-                // TODO: dispose managed state (managed objects)
-            }
-
             GraphicsDeviceContext.Dispose();
 
             GraphicsDevice.Dispose();
