@@ -17,7 +17,7 @@ public abstract class Shader
 
     internal abstract void Create();
 
-    internal abstract void Bind();
+    protected abstract void Bind();
 }
 
 public abstract class Shader<T> : Shader, IDisposable where T : unmanaged, IComVtbl<T>, IComVtbl<ID3D11DeviceChild>

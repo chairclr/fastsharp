@@ -14,6 +14,7 @@
     <PackageReference Include="Silk.NET.Direct3D11" Version="2.17.1" />
     <PackageReference Include="Silk.NET.DXGI" Version="2.17.1" />
     <PackageReference Include="Silk.NET.Windowing.Glfw" Version="2.17.1" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.0.1" />
   </ItemGroup>
 
 </Project>

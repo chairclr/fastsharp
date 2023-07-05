@@ -6,4 +6,9 @@ public partial class Device
     {
         return new Texture2D(this, width, height);
     }
+
+    public Texture2D CreateStagingCopy(Texture2D target)
+    {
+        return target.CreateStagingTexture();
+    }
 }

@@ -5,20 +5,23 @@ using Silk.NET.DXGI;
 
 namespace FastSharp;
 
-public unsafe class Texture2D : Texture<ID3D11Texture2D>, IDisposable, IMappableResource
+public unsafe class Texture2D : Texture<ID3D11Texture2D>
 {
-    public readonly Device Device;
+    public int Width { get; private set; } = 0;
 
-    public readonly int Width = 0;
+    public int Height { get; private set; } = 0;
 
-    public readonly int Height = 0;
+    protected override int Size => Width * Height;
 
-    public readonly Format Format = Format.FormatUnknown;
+    internal Texture2D(Device device)
+        : base(device)
+    {
+
+    }
 
     public Texture2D(Device device, int width, int height)
+        : base(device)
     {
-        Device = device;
-
         Width = width;
 
         Height = height;
@@ -31,7 +34,7 @@ public unsafe class Texture2D : Texture<ID3D11Texture2D>, IDisposable, IMappable
             SampleDesc = new SampleDesc(1, 0),
             ArraySize = 1,
             BindFlags = (uint)BindFlag.UnorderedAccess,
-            Format = Format.FormatR8G8B8A8Unorm
+            Format = Format.FormatR8G8B8A8Unorm,
         };
 
         Format = desc.Format;
@@ -40,9 +43,8 @@ public unsafe class Texture2D : Texture<ID3D11Texture2D>, IDisposable, IMappable
     }
 
     public Texture2D(Device device, int width, int height, Format format)
+        : base(device)
     {
-        Device = device;
-
         Width = width;
 
         Height = height;
@@ -63,32 +65,38 @@ public unsafe class Texture2D : Texture<ID3D11Texture2D>, IDisposable, IMappable
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, (SubresourceData*)null, ref GraphicsTexture));
     }
 
-    public Span<T> MapWrite<T>(int subresource = 0) where T : unmanaged
+    internal Texture2DDesc GetTextureDescription()
     {
-        throw new NotImplementedException();
+        Texture2DDesc textureDesc = new Texture2DDesc();
+
+        GraphicsTexture.GetDesc(ref textureDesc);
+
+        return textureDesc;
     }
 
-    public ReadOnlySpan<T> MapRead<T>(int subresource = 0) where T : unmanaged
+    internal Texture2D CreateStagingTexture()
     {
-        if (subresource < 0)
+        Texture2D stagingTexture = new Texture2D(Device);
+
+        Texture2DDesc desc = GetTextureDescription();
+
+        stagingTexture.Width = Width;
+
+        stagingTexture.Height = Height;
+
+        stagingTexture.Format = Format;
+
+        desc = desc with
         {
-            throw new ArgumentOutOfRangeException(nameof(subresource), "subresource must be positive");
-        }
+            Usage = Usage.Staging,
+            CPUAccessFlags = (uint)CpuAccessFlag.Read,
+            MipLevels = 0,
+            BindFlags = (uint)BindFlag.None,
+            SampleDesc = new SampleDesc(1, 0)
+        };
 
-        MappedSubresource mappedSubresource = default;
+        SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, (SubresourceData*)null, ref stagingTexture.GraphicsTexture));
 
-        int hr = Device.GraphicsDeviceContext.Map(GraphicsTexture, (uint)subresource, Map.Read, 0, ref mappedSubresource);
-
-        if (!HResult.IndicatesSuccess(hr))
-        {
-            throw new Exception("Failed to map subresource");
-        }
-
-        return new ReadOnlySpan<T>(mappedSubresource.PData, Width * Height);
-    }
-
-    public void Unmap(int subresource = 0)
-    {
-        Device.GraphicsDeviceContext.Unmap(GraphicsTexture, (uint)subresource);
+        return stagingTexture;
     }
 }

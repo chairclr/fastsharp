@@ -60,8 +60,6 @@ public partial class Device : IDisposable
             Console.ResetColor();
         });
 #endif
-
-
     }
 
     protected virtual void Dispose(bool disposing)
