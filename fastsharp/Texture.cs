@@ -120,7 +120,7 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
 
         MappedSubresource mappedSubresource = default;
 
-        int hr = Device.GraphicsDeviceContext.Map(GraphicsResource, (uint)subresource, Map.Write, 0, ref mappedSubresource);
+        int hr = Device.GraphicsDeviceContext.Map(GraphicsResource, (uint)subresource, Map.WriteDiscard, 0, ref mappedSubresource);
 
         if (!HResult.IndicatesSuccess(hr))
         {
