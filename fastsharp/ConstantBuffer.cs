@@ -51,7 +51,7 @@ public unsafe class ConstantBuffer<T> : Buffer<T>
     /// Copies the buffer to the GPU.
     /// This should be called every time you change Data and need to render on the GPU.
     /// </summary>
-    public unsafe void WriteData()
+    public void WriteData()
     {
         MappedSubresource mappedSubresource = new MappedSubresource();
 
