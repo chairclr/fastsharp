@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Silk.NET.Core.Native;
 using Silk.NET.Direct3D11;
 

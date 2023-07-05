@@ -24,7 +24,7 @@ internal class Program
         using Texture2D texture = device.CreateUnorderedAccessTexture2D(1024, 1024);
         using Texture2D stagingTexture = device.CreateStagingCopy(texture);
 
-        using Texture2D immutableTexture = device.CreateImmutableTexture2D(2, 2, new Rgba32[] 
+        using Texture2D immutableTexture = device.CreateImmutableTexture2D(2, 2, new Rgba32[]
         {
             new Rgba32(1.0f, 0.0f, 0.0f), new Rgba32(0.0f, 1.0f, 1.0f),
             new Rgba32(0.0f, 1.0f, 0.0f), new Rgba32(1.0f, 0.0f, 1.0f),

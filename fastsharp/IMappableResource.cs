@@ -7,7 +7,7 @@ public interface IMappableResource
 
     public ReadOnlySpan<T> MapRead<T>(int subresource = 0)
         where T : unmanaged;
-    
+
     public Span<T> MapReadWrite<T>(int subresource = 0)
         where T : unmanaged;
 
