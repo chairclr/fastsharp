@@ -19,7 +19,8 @@ public abstract class Shader
     protected abstract void Bind();
 }
 
-public abstract class Shader<T> : Shader, IDisposable where T : unmanaged, IComVtbl<T>, IComVtbl<ID3D11DeviceChild>
+public abstract class Shader<T> : Shader, IDisposable
+    where T : unmanaged, IComVtbl<T>, IComVtbl<ID3D11DeviceChild>
 {
     internal ComPtr<T> GraphicsShader = default;
 
