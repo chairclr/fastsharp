@@ -38,6 +38,7 @@ public abstract class Buffer : IDisposable
 }
 
 public abstract class Buffer<T> : Buffer
+    where T : unmanaged
 {
     public uint Stride => (uint)Unsafe.SizeOf<T>();
 
