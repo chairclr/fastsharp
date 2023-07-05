@@ -66,6 +66,10 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
         {
             unorderedAccessViewDesc.ViewDimension = UavDimension.Texture2D;
         }
+        else if (this is Texture3D)
+        {
+            unorderedAccessViewDesc.ViewDimension = UavDimension.Texture3D;
+        }
 
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateUnorderedAccessView(GraphicsResource, unorderedAccessViewDesc, ref accessView));
 
@@ -90,6 +94,11 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
         {
             shaderResourceViewDesc.ViewDimension = D3DSrvDimension.D3D101SrvDimensionTexture2D;
             shaderResourceViewDesc.Texture2D.MipLevels = uint.MaxValue;
+        }
+        else if (this is Texture3D)
+        {
+            shaderResourceViewDesc.ViewDimension = D3DSrvDimension.D3D101SrvDimensionTexture3D;
+            shaderResourceViewDesc.Texture3D.MipLevels = uint.MaxValue;
         }
 
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateShaderResourceView(GraphicsResource, shaderResourceViewDesc, ref resourceView));
