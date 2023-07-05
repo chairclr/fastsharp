@@ -37,8 +37,8 @@ internal class Program
         int y = (int)Math.Ceiling(texture.Height / 16f);
 
         computeShader.SetShaderResource(0, immutableTexture);
-        computeShader.SetUnorderedAccess(0, texture);
-        computeShader.SetUnorderedAccess(1, cool1DTexture);
+        computeShader.SetUnorderedAccessResource(0, texture);
+        computeShader.SetUnorderedAccessResource(1, cool1DTexture);
         computeShader.Dispatch((uint)x, (uint)y, 1);
 
         texture.CopyTo(stagingTexture);
