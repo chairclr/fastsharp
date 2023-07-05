@@ -17,7 +17,7 @@ public unsafe class ConstantBuffer<T> : Buffer<T>
 
     public T Data;
 
-    public ConstantBuffer(Device device, T initialData)
+    public ConstantBuffer(Device device, in T initialData)
         : base(device)
     {
         Data = initialData;
