@@ -1,34 +1,38 @@
 ﻿using System.Runtime.InteropServices;
+using unsafe RenderDocGetAPI = delegate* unmanaged[Cdecl]<int, ref FastSharp.RenderDocUtil.RenderDocAPI*, int>;
 
 namespace FastSharp;
 
 // Utility class to tell RenderDoc to capture frames
 // Only used for debugging purposes
-// And yes I know this code is sloppy and bad
 internal unsafe static partial class RenderDocUtil
 {
     public static readonly bool RenderDocEnabled = false;
 
-    private static readonly RENDERDOC_API_1_1_2* API;
+    private static readonly RenderDocAPI* API;
+
+    private const int RenderDocAPIVersion = 10600;
 
     static RenderDocUtil()
     {
-        nint hmodule = GetModuleHandle("renderdoc.dll");
-
-        if (hmodule != 0)
+        if (NativeLibrary.TryLoad("renderdoc.dll", out nint renderdocLibrary))
         {
+            Console.WriteLine($"RenderDoc Loaded");
+
             RenderDocEnabled = true;
 
-            delegate* unmanaged[Cdecl]<int, RENDERDOC_API_1_1_2**, int> getapi = (delegate* unmanaged[Cdecl]<int, RENDERDOC_API_1_1_2**, int>)(GetProcAddress(hmodule, "RENDERDOC_GetAPI"));
-
-            fixed (RENDERDOC_API_1_1_2** ptr = &API)
+            if (!NativeLibrary.TryGetExport(renderdocLibrary, "RENDERDOC_GetAPI", out nint getAPIAddress))
             {
-                int ret = getapi(10102, ptr);
+                throw new Exception("Failed to find 'RENDERDOC_GetAPI' export");
+            }
 
-                if (ret != 1)
-                {
-                    throw new Exception("Failed to get RenderDoc api");
-                }
+            RenderDocGetAPI getapi = (RenderDocGetAPI)getAPIAddress;
+
+            int ret = getapi(RenderDocAPIVersion, ref API);
+
+            if (ret != 1)
+            {
+                throw new Exception("Failed to get RenderDoc api");
             }
         }
     }
@@ -37,6 +41,7 @@ internal unsafe static partial class RenderDocUtil
     {
         if (RenderDocEnabled)
         {
+            Console.WriteLine("Starting Frame Capture");
             API->StartFrameCapture(0, 0);
         }
     }
@@ -45,18 +50,16 @@ internal unsafe static partial class RenderDocUtil
     {
         if (RenderDocEnabled)
         {
+            Console.WriteLine("Ending Frame Capture");
             API->EndFrameCapture(0, 0);
         }
     }
-
-    [LibraryImport("kernel32.dll", EntryPoint = "GetModuleHandleW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
-    private static partial nint GetModuleHandle(string module);
 
     [LibraryImport("kernel32.dll", EntryPoint = "GetProcAddress", SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
     private static partial nint GetProcAddress(nint hModule, string procName);
 
     [StructLayout(LayoutKind.Sequential)]
-    private readonly struct RENDERDOC_API_1_1_2
+    internal readonly struct RenderDocAPI
     {
         private readonly nint GetAPIVersion;
 
