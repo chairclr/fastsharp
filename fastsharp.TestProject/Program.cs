@@ -18,6 +18,7 @@ internal class Program
         if (RenderDocUtil.RenderDocEnabled)
         {
             RenderDocUtil.StartFrameCapture();
+
             Thread.Sleep(1000);
         }
 #endif
@@ -37,6 +38,11 @@ internal class Program
         texture.CopyTo(stagingTexture);
 
         ReadOnlySpan<Rgba32> textureSpan = stagingTexture.MapRead<Rgba32>();
+
+        for (int i = 0; i < 20; i++)
+        {
+            Console.WriteLine($"{textureSpan[i].ToHex()}");
+        }
 
 #if DEBUG
         if (RenderDocUtil.RenderDocEnabled)

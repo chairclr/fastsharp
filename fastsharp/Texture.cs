@@ -5,7 +5,7 @@ using Silk.NET.DXGI;
 
 namespace FastSharp;
 
-public unsafe abstract class Texture : IMappableResource
+public unsafe abstract class Texture : IMappableResource, IDisposable
 {
     public readonly Device Device;
 
@@ -29,6 +29,8 @@ public unsafe abstract class Texture : IMappableResource
     }
 
     protected abstract ComPtr<ID3D11Resource> GraphicsResource { get; }
+
+    private bool Disposed;
 
     public Texture(Device device)
     {
@@ -101,9 +103,25 @@ public unsafe abstract class Texture : IMappableResource
     {
         Device.GraphicsDeviceContext.Unmap(GraphicsResource, (uint)subresource);
     }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!Disposed)
+        {
+            GraphicsUAVCache.Dispose();
+
+            Disposed = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 }
 
-public abstract class Texture<T> : Texture, IDisposable where T : unmanaged, IComVtbl<T>, IComVtbl<ID3D11Resource>
+public abstract class Texture<T> : Texture where T : unmanaged, IComVtbl<T>, IComVtbl<ID3D11Resource>
 {
     internal ComPtr<T> GraphicsTexture = default;
 
@@ -117,19 +135,15 @@ public abstract class Texture<T> : Texture, IDisposable where T : unmanaged, ICo
 
     }
 
-    protected virtual void Dispose(bool disposing)
+    protected override void Dispose(bool disposing)
     {
+        base.Dispose(disposing);
+
         if (!Disposed)
         {
             GraphicsTexture.Dispose();
 
             Disposed = true;
         }
-    }
-
-    public void Dispose()
-    {
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
     }
 }
