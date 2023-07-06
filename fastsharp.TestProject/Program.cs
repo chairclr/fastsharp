@@ -1,5 +1,4 @@
-﻿using System;
-using FastSharp.Shaders;
+﻿using FastSharp.Shaders;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace FastSharp.TestProject;

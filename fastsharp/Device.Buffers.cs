@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-namespace FastSharp;
+﻿namespace FastSharp;
 
 public partial class Device
 {

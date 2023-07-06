@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using CommunityToolkit.HighPerformance;
 using Silk.NET.Core.Native;
 using Silk.NET.Direct3D11;
