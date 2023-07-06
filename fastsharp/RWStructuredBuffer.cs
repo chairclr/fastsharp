@@ -7,22 +7,14 @@ using Silk.NET.DXGI;
 
 namespace FastSharp;
 
-public unsafe class RWStructuredBuffer<T> : Buffer<T>, IMappableResource<T>
+public unsafe class RWStructuredBuffer<T> : CPUAccessibleBuffer<T>, IMappableResource<T>
     where T : unmanaged
 {
-    public bool Writable { get; private set; }
-
-    public bool Readable { get; private set; }
-
     internal ComPtr<ID3D11UnorderedAccessView> GraphicsUAV = default;
 
-    public RWStructuredBuffer(Device device, int length, bool writable, bool readable)
-        : base(device)
+    public RWStructuredBuffer(Device device, int length, bool readable, bool writable)
+        : base(device, readable, writable)
     {
-        Writable = writable;
-
-        Readable = readable;
-
         Length = (uint)length;
 
         BufferDesc bufferDesc = new BufferDesc()
@@ -30,8 +22,8 @@ public unsafe class RWStructuredBuffer<T> : Buffer<T>, IMappableResource<T>
             BindFlags = (uint)BindFlag.UnorderedAccess,
             StructureByteStride = Stride,
             ByteWidth = Size,
-            Usage = (Readable || Writable) ? Usage.Dynamic : Usage.Default,
-            CPUAccessFlags = (uint)((Writable ? CpuAccessFlag.Write : CpuAccessFlag.None) | (Readable ? CpuAccessFlag.Read : CpuAccessFlag.None)),
+            Usage = base.Usage,
+            CPUAccessFlags = (uint)base.CpuAccessFlag,
             MiscFlags = (uint)ResourceMiscFlag.BufferStructured
         };
 
@@ -40,13 +32,9 @@ public unsafe class RWStructuredBuffer<T> : Buffer<T>, IMappableResource<T>
         CacheUAV();
     }
 
-    public RWStructuredBuffer(Device device, ReadOnlySpan<T> initialData, bool writable, bool readable)
-        : base(device)
+    public RWStructuredBuffer(Device device, ReadOnlySpan<T> initialData, bool readable, bool writable)
+        : base(device, readable, writable)
     {
-        Writable = writable;
-
-        Readable = readable;
-
         Length = (uint)initialData.Length;
 
         BufferDesc bufferDesc = new BufferDesc()
@@ -81,99 +69,5 @@ public unsafe class RWStructuredBuffer<T> : Buffer<T>, IMappableResource<T>
         unorderedAccessViewDesc.Buffer.NumElements = Length;
 
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateUnorderedAccessView(GraphicsBuffer, unorderedAccessViewDesc, ref GraphicsUAV));
-    }
-
-    public Span<T> MapWrite(int subresource = 0)
-    {
-        if (!Writable)
-        {
-            throw new Exception("Buffer not writable");
-        }
-
-        if (subresource < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(subresource), "subresource must be positive");
-        }
-
-        MappedSubresource mappedSubresource = default;
-
-        int hr = Device.GraphicsDeviceContext.Map(GraphicsBuffer, (uint)subresource, Map.WriteDiscard, 0, ref mappedSubresource);
-
-        if (!HResult.IndicatesSuccess(hr))
-        {
-            throw new Exception("Failed to map subresource", Marshal.GetExceptionForHR(hr));
-        }
-
-        return new Span<T>(mappedSubresource.PData, (int)Size);
-    }
-
-    public ReadOnlySpan<T> MapRead(int subresource = 0)
-    {
-        if (!Readable)
-        {
-            throw new Exception("Buffer not readable");
-        }
-
-        if (subresource < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(subresource), "subresource must be positive");
-        }
-
-        MappedSubresource mappedSubresource = default;
-
-        int hr = Device.GraphicsDeviceContext.Map(GraphicsBuffer, (uint)subresource, Map.Read, 0, ref mappedSubresource);
-
-        if (!HResult.IndicatesSuccess(hr))
-        {
-            throw new Exception("Failed to map subresource", Marshal.GetExceptionForHR(hr));
-        }
-
-        return new ReadOnlySpan<T>(mappedSubresource.PData, (int)Size);
-    }
-
-    public Span<T> MapReadWrite(int subresource = 0)
-    {
-        if (!Readable || !Writable)
-        {
-            throw new Exception("Buffer not read/writable");
-        }
-
-        if (subresource < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(subresource), "subresource must be positive");
-        }
-
-        MappedSubresource mappedSubresource = default;
-
-        int hr = Device.GraphicsDeviceContext.Map(GraphicsBuffer, (uint)subresource, Map.ReadWrite, 0, ref mappedSubresource);
-
-        if (!HResult.IndicatesSuccess(hr))
-        {
-            throw new Exception("Failed to map subresource", Marshal.GetExceptionForHR(hr));
-        }
-
-        return new Span<T>(mappedSubresource.PData, (int)Size);
-    }
-
-    public void WriteData(Span<T> data, int subresource = 0)
-    {
-        data.CopyTo(MapWrite(subresource));
-
-        Unmap(subresource);
-    }
-
-    public void Unmap(int subresource = 0)
-    {
-        if (!(Readable || Writable))
-        {
-            throw new Exception("Cannot unmap an unreadable or unwritable buffer");
-        }
-
-        if (subresource < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(subresource), "subresource must be positive");
-        }
-
-        Device.GraphicsDeviceContext.Unmap(GraphicsBuffer, (uint)subresource);
     }
 }
