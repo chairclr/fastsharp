@@ -46,7 +46,7 @@ public unsafe class RWStructuredBuffer<T> : Buffer<T>, IMappableResource<T> wher
             BindFlags = (uint)BindFlag.UnorderedAccess,
             StructureByteStride = Stride,
             ByteWidth = Size,
-            Usage = Writable ? Usage.Dynamic : Usage.Dynamic,
+            Usage = Writable ? Usage.Dynamic : Usage.Default,
             CPUAccessFlags = (uint)(Writable ? CpuAccessFlag.Write : CpuAccessFlag.None)
         };
 

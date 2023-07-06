@@ -46,7 +46,7 @@ public unsafe class StructuredBuffer<T> : Buffer<T>, IMappableResource<T> where 
             BindFlags = (uint)BindFlag.ShaderResource,
             StructureByteStride = Stride,
             ByteWidth = Size,
-            Usage = Writable ? Usage.Dynamic : Usage.Dynamic,
+            Usage = Writable ? Usage.Dynamic : Usage.Default,
             CPUAccessFlags = (uint)(Writable ? CpuAccessFlag.Write : CpuAccessFlag.None)
         };
 
