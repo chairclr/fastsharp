@@ -50,4 +50,10 @@ public class ComputeShader : Shader<ID3D11ComputeShader>
     {
         Device.GraphicsDeviceContext.CSSetShaderResources((uint)slot, 1, buffer.GraphicsSRV);
     }
+
+    public unsafe void SetShaderResource<T>(int slot, ShaderResourceBuffer<T> buffer)
+        where T : unmanaged
+    {
+        Device.GraphicsDeviceContext.CSSetShaderResources((uint)slot, 1, buffer.GraphicsSRV);
+    }
 }

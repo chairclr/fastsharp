@@ -13,6 +13,8 @@ struct TestStruct
 
 RWStructuredBuffer<TestStruct> TestRWBuffer : register(u2);
 
+Buffer<float4> TestResourceBuffer : register(t1);
+
 [numthreads(16, 16, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
@@ -25,7 +27,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float4 color = TestSRV.Load(coords);
     
     TestTexture[id.xy] = color;
-    Test1DTexture[id.x + id.y] = color;
+    Test1DTexture[id.x + id.y] = TestResourceBuffer[id.x % 2];
     
     TestStruct ts = TestRWBuffer[id.x];
     

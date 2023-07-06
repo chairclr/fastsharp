@@ -16,9 +16,9 @@ public unsafe class ShaderResourceBuffer<T> : CPUAccessibleBuffer<T>, IMappableR
     public ShaderResourceBuffer(Device device, Format format, int length, bool readable, bool writable)
         : base(device, readable, writable)
     {
-        Length = (uint)length;
-
         Format = format;
+
+        Length = (uint)length;
 
         BufferDesc bufferDesc = new BufferDesc()
         {
@@ -37,6 +37,8 @@ public unsafe class ShaderResourceBuffer<T> : CPUAccessibleBuffer<T>, IMappableR
         : base(device, readable, writable)
     {
         Format = format;
+
+        Length = (uint)initialData.Length;
 
         BufferDesc bufferDesc = new BufferDesc()
         {

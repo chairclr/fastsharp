@@ -1,4 +1,6 @@
-﻿using FastSharp.Shaders;
+﻿using System.Numerics;
+using FastSharp.Shaders;
+using Silk.NET.DXGI;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace FastSharp.TestProject;
@@ -42,11 +44,24 @@ internal class Program
 
         using RWStructuredBuffer<TestStruct> structuredBuffer = new RWStructuredBuffer<TestStruct>(device, coolStructs, false, false);
 
+        Vector4[] values = new Vector4[] { new Vector4(0f), new Vector4(1f) };
+
+        using ShaderResourceBuffer<Vector4> shaderResourceBuffer = new ShaderResourceBuffer<Vector4>(device, Format.FormatR32G32B32A32Float, values, true, true);
+
+        ReadOnlySpan<Vector4> readValues = shaderResourceBuffer.MapRead();
+
+        shaderResourceBuffer.Unmap();
+
+        Vector4[] newValues = new Vector4[] { new Vector4(0.5f), new Vector4(1f) };
+
+        shaderResourceBuffer.WriteData(newValues);
+
         // Calculate number of thread groups to process entire image
         int x = (int)Math.Ceiling(texture.Width / 16f);
         int y = (int)Math.Ceiling(texture.Height / 16f);
 
         computeShader.SetShaderResource(0, immutableTexture);
+        computeShader.SetShaderResource(1, shaderResourceBuffer);
         computeShader.SetUnorderedAccessResource(0, texture);
         computeShader.SetUnorderedAccessResource(1, cool1DTexture);
         computeShader.SetUnorderedAccessResource(2, structuredBuffer);

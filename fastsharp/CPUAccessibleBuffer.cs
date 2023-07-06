@@ -11,7 +11,7 @@ public unsafe abstract class CPUAccessibleBuffer<T> : Buffer<T>, IMappableResour
 
     public bool Readable { get; private set; }
 
-    protected Usage Usage => (Readable || Writable) ? Usage.Dynamic : Usage.Default;
+    protected Usage Usage => (Writable && !Readable) ? Usage.Dynamic : Usage.Default;
 
     protected CpuAccessFlag CpuAccessFlag => (Writable ? CpuAccessFlag.Write : CpuAccessFlag.None) | (Readable ? CpuAccessFlag.Read : CpuAccessFlag.None);
 
@@ -37,7 +37,7 @@ public unsafe abstract class CPUAccessibleBuffer<T> : Buffer<T>, IMappableResour
 
         MappedSubresource mappedSubresource = default;
 
-        int hr = Device.GraphicsDeviceContext.Map(GraphicsBuffer, (uint)subresource, Map.WriteDiscard, 0, ref mappedSubresource);
+        int hr = Device.GraphicsDeviceContext.Map(GraphicsBuffer, (uint)subresource, Usage == Usage.Dynamic ? Map.WriteDiscard : Map.Write, 0, ref mappedSubresource);
 
         if (!HResult.IndicatesSuccess(hr))
         {
