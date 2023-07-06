@@ -168,6 +168,14 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
         return new Span<T>(mappedSubresource.PData, Size);
     }
 
+    public void WriteData<T>(Span<T> data, int subresource = 0)
+        where T : unmanaged
+    {
+        data.CopyTo(MapWrite<T>(subresource));
+
+        Unmap(subresource);
+    }
+
     public void Unmap(int subresource = 0)
     {
         if (subresource < 0)
