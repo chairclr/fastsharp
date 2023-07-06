@@ -15,9 +15,11 @@ public unsafe class StructuredBuffer<T> : Buffer<T>, IMappableResource<T> where 
 
     internal ComPtr<ID3D11ShaderResourceView> GraphicsSRV = default;
 
-    public StructuredBuffer(Device device, bool writable, bool readable)
+    public StructuredBuffer(Device device, int length, bool writable, bool readable)
         : base(device)
     {
+        Length = (uint)length;
+
         Writable = writable;
 
         Readable = readable;
