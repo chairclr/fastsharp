@@ -16,3 +16,17 @@ public interface IMappableResource
 
     public void Unmap(int subresource = 0);
 }
+
+public interface IMappableResource<T>
+    where T : unmanaged
+{
+    public Span<T> MapWrite(int subresource = 0);
+
+    public ReadOnlySpan<T> MapRead(int subresource = 0);
+
+    public Span<T> MapReadWrite(int subresource = 0);
+
+    public void WriteData(Span<T> data, int subresource = 0);
+
+    public void Unmap(int subresource = 0);
+}
