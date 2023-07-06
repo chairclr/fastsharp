@@ -20,7 +20,7 @@ public unsafe class Texture1D : Texture<ID3D11Texture1D>
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture1D(desc, (SubresourceData*)null, ref GraphicsTexture));
     }
 
-    internal Texture1D(Device device, Texture1DDesc desc, Span<byte> initialData)
+    internal Texture1D(Device device, Texture1DDesc desc, ReadOnlySpan<byte> initialData)
         : base(device)
     {
         CacheDescriptionFields(desc);
@@ -52,7 +52,7 @@ public unsafe class Texture1D : Texture<ID3D11Texture1D>
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture1D(desc, (SubresourceData*)null, ref GraphicsTexture));
     }
 
-    public Texture1D(Device device, int length, Span<byte> initialData, Format format = Format.FormatR8G8B8A8Unorm, Usage usage = Usage.Default, BindFlag bindFlag = BindFlag.UnorderedAccess, CpuAccessFlag cpuAccessFlag = CpuAccessFlag.None)
+    public Texture1D(Device device, int length, ReadOnlySpan<byte> initialData, Format format = Format.FormatR8G8B8A8Unorm, Usage usage = Usage.Default, BindFlag bindFlag = BindFlag.UnorderedAccess, CpuAccessFlag cpuAccessFlag = CpuAccessFlag.None)
         : base(device)
     {
         Texture1DDesc desc = new Texture1DDesc()

@@ -11,7 +11,7 @@ public partial class Device
         return new Texture2D(this, width, height, format, usage, bindFlag, cpuAccessFlag);
     }
 
-    public Texture2D CreateTexture2D<T>(int width, int height, Format format, Usage usage, BindFlag bindFlag, CpuAccessFlag cpuAccessFlag, Span<T> initialData)
+    public Texture2D CreateTexture2D<T>(int width, int height, Format format, Usage usage, BindFlag bindFlag, CpuAccessFlag cpuAccessFlag, ReadOnlySpan<T> initialData)
         where T : unmanaged
     {
         return new Texture2D(this, width, height, MemoryMarshal.AsBytes(initialData), format, usage, bindFlag, cpuAccessFlag);
@@ -22,12 +22,12 @@ public partial class Device
         return new Texture2D(this, width, height, bindFlag: BindFlag.UnorderedAccess);
     }
 
-    public Texture2D CreateRWTexture2D(int width, int height, Span<Rgba32> data)
+    public Texture2D CreateRWTexture2D(int width, int height, ReadOnlySpan<Rgba32> data)
     {
         return new Texture2D(this, width, height, MemoryMarshal.AsBytes(data), bindFlag: BindFlag.UnorderedAccess);
     }
 
-    public Texture2D CreateRWTexture2D<T>(int width, int height, Format format, Span<T> data)
+    public Texture2D CreateRWTexture2D<T>(int width, int height, Format format, ReadOnlySpan<T> data)
         where T : unmanaged
     {
         return new Texture2D(this, width, height, MemoryMarshal.AsBytes(data), format: format, bindFlag: BindFlag.UnorderedAccess);
@@ -38,23 +38,23 @@ public partial class Device
         return new Texture2D(this, width, height, bindFlag: BindFlag.ShaderResource);
     }
 
-    public Texture2D CreateShaderResourceTexture2D(int width, int height, Span<Rgba32> data)
+    public Texture2D CreateShaderResourceTexture2D(int width, int height, ReadOnlySpan<Rgba32> data)
     {
         return new Texture2D(this, width, height, MemoryMarshal.AsBytes(data), bindFlag: BindFlag.ShaderResource);
     }
 
-    public Texture2D CreateShaderResourceTexture2D<T>(int width, int height, Format format, Span<T> data)
+    public Texture2D CreateShaderResourceTexture2D<T>(int width, int height, Format format, ReadOnlySpan<T> data)
         where T : unmanaged
     {
         return new Texture2D(this, width, height, MemoryMarshal.AsBytes(data), format: format, bindFlag: BindFlag.ShaderResource);
     }
 
-    public Texture2D CreateImmutableTexture2D(int width, int height, Span<Rgba32> data)
+    public Texture2D CreateImmutableTexture2D(int width, int height, ReadOnlySpan<Rgba32> data)
     {
         return new Texture2D(this, width, height, MemoryMarshal.AsBytes(data), usage: Usage.Immutable, bindFlag: BindFlag.ShaderResource);
     }
 
-    public Texture2D CreateImmutableTexture2D<T>(int width, int height, Format format, Span<T> data)
+    public Texture2D CreateImmutableTexture2D<T>(int width, int height, Format format, ReadOnlySpan<T> data)
         where T : unmanaged
     {
         return new Texture2D(this, width, height, MemoryMarshal.AsBytes(data), format: format, usage: Usage.Immutable, bindFlag: BindFlag.ShaderResource);

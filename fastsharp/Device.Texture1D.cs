@@ -11,7 +11,7 @@ public partial class Device
         return new Texture1D(this, length, format, usage, bindFlag, cpuAccessFlag);
     }
 
-    public Texture1D CreateTexture1D<T>(int length, Format format, Usage usage, BindFlag bindFlag, CpuAccessFlag cpuAccessFlag, Span<T> initialData)
+    public Texture1D CreateTexture1D<T>(int length, Format format, Usage usage, BindFlag bindFlag, CpuAccessFlag cpuAccessFlag, ReadOnlySpan<T> initialData)
         where T : unmanaged
     {
         return new Texture1D(this, length, MemoryMarshal.AsBytes(initialData), format, usage, bindFlag, cpuAccessFlag);
@@ -22,12 +22,12 @@ public partial class Device
         return new Texture1D(this, length, bindFlag: BindFlag.UnorderedAccess);
     }
 
-    public Texture1D CreateRWTexture1D(int length, Span<Rgba32> data)
+    public Texture1D CreateRWTexture1D(int length, ReadOnlySpan<Rgba32> data)
     {
         return new Texture1D(this, length, MemoryMarshal.AsBytes(data), bindFlag: BindFlag.UnorderedAccess);
     }
 
-    public Texture1D CreateRWTexture1D<T>(int length, Format format, Span<T> data)
+    public Texture1D CreateRWTexture1D<T>(int length, Format format, ReadOnlySpan<T> data)
         where T : unmanaged
     {
         return new Texture1D(this, length, MemoryMarshal.AsBytes(data), format: format, bindFlag: BindFlag.UnorderedAccess);
@@ -38,23 +38,23 @@ public partial class Device
         return new Texture1D(this, length, bindFlag: BindFlag.ShaderResource);
     }
 
-    public Texture1D CreateShaderResourceTexture1D(int length, Span<Rgba32> data)
+    public Texture1D CreateShaderResourceTexture1D(int length, ReadOnlySpan<Rgba32> data)
     {
         return new Texture1D(this, length, MemoryMarshal.AsBytes(data), bindFlag: BindFlag.ShaderResource);
     }
 
-    public Texture1D CreateShaderResourceTexture1D<T>(int length, Format format, Span<T> data)
+    public Texture1D CreateShaderResourceTexture1D<T>(int length, Format format, ReadOnlySpan<T> data)
         where T : unmanaged
     {
         return new Texture1D(this, length, MemoryMarshal.AsBytes(data), format: format, bindFlag: BindFlag.ShaderResource);
     }
 
-    public Texture1D CreateImmutableTexture1D(int length, Span<Rgba32> data)
+    public Texture1D CreateImmutableTexture1D(int length, ReadOnlySpan<Rgba32> data)
     {
         return new Texture1D(this, length, MemoryMarshal.AsBytes(data), usage: Usage.Immutable, bindFlag: BindFlag.ShaderResource);
     }
 
-    public Texture1D CreateImmutableTexture1D<T>(int length, Format format, Span<T> data)
+    public Texture1D CreateImmutableTexture1D<T>(int length, Format format, ReadOnlySpan<T> data)
         where T : unmanaged
     {
         return new Texture1D(this, length, MemoryMarshal.AsBytes(data), format: format, usage: Usage.Immutable, bindFlag: BindFlag.ShaderResource);

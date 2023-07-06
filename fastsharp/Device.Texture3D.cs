@@ -11,7 +11,7 @@ public partial class Device
         return new Texture3D(this, width, height, depth, format, usage, bindFlag, cpuAccessFlag);
     }
 
-    public Texture3D CreateTexture3D<T>(int width, int height, int depth, Format format, Usage usage, BindFlag bindFlag, CpuAccessFlag cpuAccessFlag, Span<T> initialData)
+    public Texture3D CreateTexture3D<T>(int width, int height, int depth, Format format, Usage usage, BindFlag bindFlag, CpuAccessFlag cpuAccessFlag, ReadOnlySpan<T> initialData)
         where T : unmanaged
     {
         return new Texture3D(this, width, height, depth, MemoryMarshal.AsBytes(initialData), format, usage, bindFlag, cpuAccessFlag);
@@ -22,12 +22,12 @@ public partial class Device
         return new Texture3D(this, width, height, depth, bindFlag: BindFlag.UnorderedAccess);
     }
 
-    public Texture3D CreateRWTexture3D(int width, int height, int depth, Span<Rgba32> data)
+    public Texture3D CreateRWTexture3D(int width, int height, int depth, ReadOnlySpan<Rgba32> data)
     {
         return new Texture3D(this, width, height, depth, MemoryMarshal.AsBytes(data), bindFlag: BindFlag.UnorderedAccess);
     }
 
-    public Texture3D CreateRWTexture3D<T>(int width, int height, int depth, Format format, Span<T> data)
+    public Texture3D CreateRWTexture3D<T>(int width, int height, int depth, Format format, ReadOnlySpan<T> data)
         where T : unmanaged
     {
         return new Texture3D(this, width, height, depth, MemoryMarshal.AsBytes(data), format: format, bindFlag: BindFlag.UnorderedAccess);
@@ -38,23 +38,23 @@ public partial class Device
         return new Texture3D(this, width, height, depth, bindFlag: BindFlag.ShaderResource);
     }
 
-    public Texture3D CreateShaderResourceTexture3D(int width, int height, int depth, Span<Rgba32> data)
+    public Texture3D CreateShaderResourceTexture3D(int width, int height, int depth, ReadOnlySpan<Rgba32> data)
     {
         return new Texture3D(this, width, height, depth, MemoryMarshal.AsBytes(data), bindFlag: BindFlag.ShaderResource);
     }
 
-    public Texture3D CreateShaderResourceTexture3D<T>(int width, int height, int depth, Format format, Span<T> data)
+    public Texture3D CreateShaderResourceTexture3D<T>(int width, int height, int depth, Format format, ReadOnlySpan<T> data)
         where T : unmanaged
     {
         return new Texture3D(this, width, height, depth, MemoryMarshal.AsBytes(data), format: format, bindFlag: BindFlag.ShaderResource);
     }
 
-    public Texture3D CreateImmutableTexture3D(int width, int height, int depth, Span<Rgba32> data)
+    public Texture3D CreateImmutableTexture3D(int width, int height, int depth, ReadOnlySpan<Rgba32> data)
     {
         return new Texture3D(this, width, height, depth, MemoryMarshal.AsBytes(data), usage: Usage.Immutable, bindFlag: BindFlag.ShaderResource);
     }
 
-    public Texture3D CreateImmutableTexture3D<T>(int width, int height, int depth, Format format, Span<T> data)
+    public Texture3D CreateImmutableTexture3D<T>(int width, int height, int depth, Format format, ReadOnlySpan<T> data)
         where T : unmanaged
     {
         return new Texture3D(this, width, height, depth, MemoryMarshal.AsBytes(data), format: format, usage: Usage.Immutable, bindFlag: BindFlag.ShaderResource);

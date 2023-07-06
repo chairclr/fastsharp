@@ -39,7 +39,7 @@ public unsafe class RWStructuredBuffer<T> : Buffer<T>, IMappableResource<T> wher
         CacheUAV();
     }
 
-    public RWStructuredBuffer(Device device, Span<T> initialData, bool writable, bool readable)
+    public RWStructuredBuffer(Device device, ReadOnlySpan<T> initialData, bool writable, bool readable)
         : base(device)
     {
         Writable = writable;

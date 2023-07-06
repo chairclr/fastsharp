@@ -22,7 +22,7 @@ public unsafe class Texture2D : Texture<ID3D11Texture2D>
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, (SubresourceData*)null, ref GraphicsTexture));
     }
 
-    internal Texture2D(Device device, Texture2DDesc desc, Span<byte> initialData)
+    internal Texture2D(Device device, Texture2DDesc desc, ReadOnlySpan<byte> initialData)
         : base(device)
     {
         CacheDescriptionFields(desc);
@@ -56,7 +56,7 @@ public unsafe class Texture2D : Texture<ID3D11Texture2D>
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, (SubresourceData*)null, ref GraphicsTexture));
     }
 
-    public Texture2D(Device device, int width, int height, Span<byte> initialData, Format format = Format.FormatR8G8B8A8Unorm, Usage usage = Usage.Default, BindFlag bindFlag = BindFlag.UnorderedAccess, CpuAccessFlag cpuAccessFlag = CpuAccessFlag.None)
+    public Texture2D(Device device, int width, int height, ReadOnlySpan<byte> initialData, Format format = Format.FormatR8G8B8A8Unorm, Usage usage = Usage.Default, BindFlag bindFlag = BindFlag.UnorderedAccess, CpuAccessFlag cpuAccessFlag = CpuAccessFlag.None)
         : base(device)
     {
         Texture2DDesc desc = new Texture2DDesc()

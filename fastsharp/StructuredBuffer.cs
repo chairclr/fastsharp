@@ -37,7 +37,7 @@ public unsafe class StructuredBuffer<T> : Buffer<T>, IMappableResource<T> where 
         CacheSRV();
     }
 
-    public StructuredBuffer(Device device, Span<T> initialData, bool writable, bool readable)
+    public StructuredBuffer(Device device, ReadOnlySpan<T> initialData, bool writable, bool readable)
         : base(device)
     {
         Writable = writable;
