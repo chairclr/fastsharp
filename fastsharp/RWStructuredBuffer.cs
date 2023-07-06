@@ -15,12 +15,14 @@ public unsafe class RWStructuredBuffer<T> : Buffer<T>, IMappableResource<T> wher
 
     internal ComPtr<ID3D11UnorderedAccessView> GraphicsUAV = default;
 
-    public RWStructuredBuffer(Device device, bool writable, bool readable)
+    public RWStructuredBuffer(Device device, int length, bool writable, bool readable)
         : base(device)
     {
         Writable = writable;
 
         Readable = readable;
+
+        Length = (uint)length;
 
         BufferDesc bufferDesc = new BufferDesc()
         {
@@ -28,7 +30,8 @@ public unsafe class RWStructuredBuffer<T> : Buffer<T>, IMappableResource<T> wher
             StructureByteStride = Stride,
             ByteWidth = Size,
             Usage = (Readable || Writable) ? Usage.Dynamic : Usage.Default,
-            CPUAccessFlags = (uint)((Writable ? CpuAccessFlag.Write : CpuAccessFlag.None) | (Readable ? CpuAccessFlag.Read : CpuAccessFlag.None))
+            CPUAccessFlags = (uint)((Writable ? CpuAccessFlag.Write : CpuAccessFlag.None) | (Readable ? CpuAccessFlag.Read : CpuAccessFlag.None)),
+            MiscFlags = (uint)ResourceMiscFlag.BufferStructured
         };
 
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateBuffer(bufferDesc, (SubresourceData*)null, ref GraphicsBuffer));
@@ -36,18 +39,23 @@ public unsafe class RWStructuredBuffer<T> : Buffer<T>, IMappableResource<T> wher
         CacheUAV();
     }
 
-    public RWStructuredBuffer(Device device, Span<T> initialData, bool writable)
+    public RWStructuredBuffer(Device device, Span<T> initialData, bool writable, bool readable)
         : base(device)
     {
         Writable = writable;
+
+        Readable = readable;
+
+        Length = (uint)initialData.Length;
 
         BufferDesc bufferDesc = new BufferDesc()
         {
             BindFlags = (uint)BindFlag.UnorderedAccess,
             StructureByteStride = Stride,
             ByteWidth = Size,
-            Usage = Writable ? Usage.Dynamic : Usage.Default,
-            CPUAccessFlags = (uint)(Writable ? CpuAccessFlag.Write : CpuAccessFlag.None)
+            Usage = (Readable || Writable) ? Usage.Dynamic : Usage.Default,
+            CPUAccessFlags = (uint)((Writable ? CpuAccessFlag.Write : CpuAccessFlag.None) | (Readable ? CpuAccessFlag.Read : CpuAccessFlag.None)),
+            MiscFlags = (uint)ResourceMiscFlag.BufferStructured
         };
 
         SubresourceData subresourceData = new SubresourceData()

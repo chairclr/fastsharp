@@ -34,8 +34,20 @@ public class ComputeShader : Shader<ID3D11ComputeShader>
         Device.GraphicsDeviceContext.CSSetUnorderedAccessViews((uint)slot, 1, texture.GraphicsUAV, (uint*)null);
     }
 
+    public unsafe void SetUnorderedAccessResource<T>(int slot, RWStructuredBuffer<T> buffer)
+        where T : unmanaged
+    {
+        Device.GraphicsDeviceContext.CSSetUnorderedAccessViews((uint)slot, 1, buffer.GraphicsUAV, (uint*)null);
+    }
+
     public unsafe void SetShaderResource(int slot, Texture texture)
     {
         Device.GraphicsDeviceContext.CSSetShaderResources((uint)slot, 1, texture.GraphicsSRV);
+    }
+
+    public unsafe void SetShaderResource<T>(int slot, StructuredBuffer<T> buffer)
+        where T : unmanaged
+    {
+        Device.GraphicsDeviceContext.CSSetShaderResources((uint)slot, 1, buffer.GraphicsSRV);
     }
 }

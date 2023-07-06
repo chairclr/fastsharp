@@ -28,7 +28,8 @@ public unsafe class StructuredBuffer<T> : Buffer<T>, IMappableResource<T> where 
             StructureByteStride = Stride,
             ByteWidth = Size,
             Usage = (Readable || Writable) ? Usage.Dynamic : Usage.Default,
-            CPUAccessFlags = (uint)((Writable ? CpuAccessFlag.Write : CpuAccessFlag.None) | (Readable ? CpuAccessFlag.Read : CpuAccessFlag.None))
+            CPUAccessFlags = (uint)((Writable ? CpuAccessFlag.Write : CpuAccessFlag.None) | (Readable ? CpuAccessFlag.Read : CpuAccessFlag.None)),
+            MiscFlags = (uint)ResourceMiscFlag.BufferStructured
         };
 
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateBuffer(bufferDesc, (SubresourceData*)null, ref GraphicsBuffer));
@@ -36,18 +37,21 @@ public unsafe class StructuredBuffer<T> : Buffer<T>, IMappableResource<T> where 
         CacheSRV();
     }
 
-    public StructuredBuffer(Device device, Span<T> initialData, bool writable)
+    public StructuredBuffer(Device device, Span<T> initialData, bool writable, bool readable)
         : base(device)
     {
         Writable = writable;
+
+        Readable = readable;
 
         BufferDesc bufferDesc = new BufferDesc()
         {
             BindFlags = (uint)BindFlag.ShaderResource,
             StructureByteStride = Stride,
             ByteWidth = Size,
-            Usage = Writable ? Usage.Dynamic : Usage.Default,
-            CPUAccessFlags = (uint)(Writable ? CpuAccessFlag.Write : CpuAccessFlag.None)
+            Usage = (Readable || Writable) ? Usage.Dynamic : Usage.Default,
+            CPUAccessFlags = (uint)((Writable ? CpuAccessFlag.Write : CpuAccessFlag.None) | (Readable ? CpuAccessFlag.Read : CpuAccessFlag.None)),
+            MiscFlags = (uint)ResourceMiscFlag.BufferStructured
         };
 
         SubresourceData subresourceData = new SubresourceData()

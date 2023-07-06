@@ -1,6 +1,17 @@
 ﻿RWTexture2D<unorm float4> TestTexture : register(u0);
 RWTexture1D<unorm float4> Test1DTexture : register(u1);
+
+
 Texture2D<unorm float4> TestSRV : register (t0);
+
+struct TestStruct
+{
+    int X;
+    int Length;
+    int2 __padding;
+};
+
+RWStructuredBuffer<TestStruct> TestRWBuffer : register(u2);
 
 [numthreads(16, 16, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
@@ -15,4 +26,13 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     
     TestTexture[id.xy] = color;
     Test1DTexture[id.x + id.y] = color;
+    
+    TestStruct ts = TestRWBuffer[id.x];
+    
+    for (int i = 0; i < ts.Length; i++)
+    {
+        ts.X += ts.Length;
+    }
+    
+    TestRWBuffer[id.x] = ts;
 }
