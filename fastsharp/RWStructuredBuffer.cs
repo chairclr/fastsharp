@@ -7,7 +7,8 @@ using Silk.NET.DXGI;
 
 namespace FastSharp;
 
-public unsafe class RWStructuredBuffer<T> : Buffer<T>, IMappableResource<T> where T : unmanaged
+public unsafe class RWStructuredBuffer<T> : Buffer<T>, IMappableResource<T>
+    where T : unmanaged
 {
     public bool Writable { get; private set; }
 
