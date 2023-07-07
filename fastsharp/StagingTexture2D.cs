@@ -86,7 +86,7 @@ public unsafe class StagingTexture2D<T> : Texture<ID3D11Texture2D>
         }
 
         ReadOnlySpan<T> span = MapRead<T>(out int rowPitch, out _, subresource);
-        ReadOnlySpan2D<T> span2d = new ReadOnlySpan2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Width, Height, (rowPitch / Unsafe.SizeOf<T>()) - Width);
+        ReadOnlySpan2D<T> span2d = new ReadOnlySpan2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Height, Width, (rowPitch / Unsafe.SizeOf<T>()) - Width);
 
         span2d.CopyTo(data);
 
@@ -96,7 +96,7 @@ public unsafe class StagingTexture2D<T> : Texture<ID3D11Texture2D>
     public T[,] Read(int subresource = 0)
     {
         ReadOnlySpan<T> span = MapRead<T>(out int rowPitch, out _, subresource);
-        ReadOnlySpan2D<T> span2d = new ReadOnlySpan2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Width, Height, (rowPitch / Unsafe.SizeOf<T>()) - Width);
+        ReadOnlySpan2D<T> span2d = new ReadOnlySpan2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Height, Width, (rowPitch / Unsafe.SizeOf<T>()) - Width);
 
         T[,] values = new T[Width, Height];
 
@@ -107,10 +107,10 @@ public unsafe class StagingTexture2D<T> : Texture<ID3D11Texture2D>
         return values;
     }
 
-    public ReadOnlySpan2D<T> MapRead(int subresource)
+    public ReadOnlySpan2D<T> MapRead(int subresource = 0)
     {
         ReadOnlySpan<T> span = MapRead<T>(out int rowPitch, out _, subresource);
 
-        return new ReadOnlySpan2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Width, Height, (rowPitch / Unsafe.SizeOf<T>()) - Width);
+        return new ReadOnlySpan2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Height, Width, (rowPitch / Unsafe.SizeOf<T>()) - Width);
     }
 }
