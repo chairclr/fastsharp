@@ -100,71 +100,6 @@ public unsafe class Texture1D<T> : Texture<ID3D11Texture1D>
         CreateSRV(D3DSrvDimension.D3D101SrvDimensionTexture1D);
     }
 
-    //internal Texture1D(Device device, Texture1DDesc desc)
-    //    : base(device)
-    //{
-    //    CacheDescriptionFields(desc);
-
-    //    SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture1D(desc, (SubresourceData*)null, ref GraphicsTexture));
-    //}
-
-    //internal Texture1D(Device device, Texture1DDesc desc, ReadOnlySpan<byte> initialData)
-    //    : base(device)
-    //{
-    //    CacheDescriptionFields(desc);
-
-    //    SubresourceData subresourceData = new SubresourceData()
-    //    {
-    //        PSysMem = Unsafe.AsPointer(ref initialData.DangerousGetReference())
-    //    };
-
-    //    SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture1D(desc, subresourceData, ref GraphicsTexture));
-    //}
-
-    //public Texture1D(Device device, int length, Format format = Format.FormatR8G8B8A8Unorm, Usage usage = Usage.Default, BindFlag bindFlag = BindFlag.UnorderedAccess, CpuAccessFlag cpuAccessFlag = CpuAccessFlag.None)
-    //    : base(device)
-    //{
-    //    Texture1DDesc desc = new Texture1DDesc()
-    //    {
-    //        Width = (uint)length,
-    //        Usage = usage,
-    //        ArraySize = 1,
-    //        BindFlags = (uint)bindFlag,
-    //        Format = format,
-    //        CPUAccessFlags = (uint)cpuAccessFlag,
-    //        MipLevels = 1
-    //    };
-
-    //    CacheDescriptionFields(desc);
-
-    //    SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture1D(desc, (SubresourceData*)null, ref GraphicsTexture));
-    //}
-
-    //public Texture1D(Device device, int length, ReadOnlySpan<byte> initialData, Format format = Format.FormatR8G8B8A8Unorm, Usage usage = Usage.Default, BindFlag bindFlag = BindFlag.UnorderedAccess, CpuAccessFlag cpuAccessFlag = CpuAccessFlag.None)
-    //    : base(device)
-    //{
-    //    Texture1DDesc desc = new Texture1DDesc()
-    //    {
-    //        Width = (uint)length,
-    //        Usage = usage,
-    //        ArraySize = 1,
-    //        BindFlags = (uint)bindFlag,
-    //        Format = format,
-    //        CPUAccessFlags = (uint)cpuAccessFlag,
-    //        MipLevels = 1
-    //    };
-
-    //    CacheDescriptionFields(desc);
-
-    //    SubresourceData subresourceData = new SubresourceData()
-    //    {
-    //        PSysMem = Unsafe.AsPointer(ref initialData.DangerousGetReference()),
-    //        SysMemPitch = (uint)Length,
-    //    };
-
-    //    SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture1D(desc, subresourceData, ref GraphicsTexture));
-    //}
-
     internal Texture1DDesc GetTextureDescription()
     {
         Texture1DDesc textureDesc = new Texture1DDesc();
@@ -183,19 +118,21 @@ public unsafe class Texture1D<T> : Texture<ID3D11Texture1D>
         Format = desc.Format;
     }
 
-    //internal Texture1D CreateStagingTexture()
-    //{
-    //    Texture1DDesc desc = GetTextureDescription();
+    public void Write(ReadOnlySpan<T> values, int subresource = 0)
+    {
+        Span<T> span = MapWrite<T>(out _, out _, subresource);
 
-    //    desc = desc with
-    //    {
-    //        Usage = Usage.Staging,
-    //        CPUAccessFlags = (uint)CpuAccessFlag.Read,
-    //        MipLevels = 1,
-    //        BindFlags = (uint)BindFlag.None
-    //    };
+        values.CopyTo(span);
 
+        Unmap();
+    }
 
-    //    return new Texture1D(Device, desc);
-    //}
+    public void Write(T[] values, int subresource = 0)
+    {
+        Span<T> span = MapWrite<T>(out _, out _, subresource);
+
+        values.AsSpan().CopyTo(span);
+
+        Unmap();
+    }
 }

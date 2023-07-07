@@ -113,7 +113,7 @@ public unsafe class Texture2D<T> : Texture<ID3D11Texture2D>
         SubresourceData subresourceData = new SubresourceData()
         {
             PSysMem = Unsafe.AsPointer(ref initialData.DangerousGetReference()),
-            SysMemPitch = (uint)Width
+            SysMemPitch = (uint)Width * (uint)Unsafe.SizeOf<T>()
         };
 
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, subresourceData, ref GraphicsTexture));
@@ -146,20 +146,23 @@ public unsafe class Texture2D<T> : Texture<ID3D11Texture2D>
         Format = desc.Format;
     }
 
-    //internal Texture2D CreateStagingTexture()
-    //{
-    //    Texture2DDesc desc = GetTextureDescription();
+    public void Write(ReadOnlySpan2D<T> values, int subresource = 0)
+    {
+        Span<T> span = MapWrite<T>(out int rowPitch, out _, subresource);
+        Span2D<T> span2d = new Span2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Height, Width, rowPitch / Unsafe.SizeOf<T>() - Unsafe.SizeOf<T>() / 2);
 
-    //    desc = desc with
-    //    {
-    //        Usage = Usage.Staging,
-    //        CPUAccessFlags = (uint)CpuAccessFlag.Read,
-    //        MipLevels = 1,
-    //        BindFlags = (uint)BindFlag.None,
-    //        SampleDesc = new SampleDesc(1, 0),
-    //    };
+        values.CopyTo(span2d);
 
+        Unmap();
+    }
 
-    //    return new Texture2D(Device, desc);
-    //}
+    public void Write(T[,] values, int subresource = 0)
+    {
+        Span<T> span = MapWrite<T>(out int rowPitch, out _, subresource);
+        Span2D<T> span2d = new Span2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Height, Width, rowPitch / Unsafe.SizeOf<T>() - Unsafe.SizeOf<T>() / 2);
+
+        values.AsSpan2D().CopyTo(span2d);
+
+        Unmap();
+    }
 }

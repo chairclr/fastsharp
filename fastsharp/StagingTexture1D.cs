@@ -64,4 +64,17 @@ public unsafe class StagingTexture1D<T> : Texture<ID3D11Texture1D>
 
         Format = desc.Format;
     }
+
+    public T[] Read(int subresource = 0)
+    {
+        ReadOnlySpan<T> span = MapRead<T>(out _, out _, subresource);
+
+        T[] values = new T[Length];
+
+        span.CopyTo(values);
+
+        Unmap(subresource);
+
+        return values;
+    }
 }

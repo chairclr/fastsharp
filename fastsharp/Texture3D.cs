@@ -162,19 +162,4 @@ public unsafe class Texture3D<T> : Texture<ID3D11Texture3D>
 
         Format = desc.Format;
     }
-
-    //internal Texture3D CreateStagingTexture()
-    //{
-    //    Texture3DDesc desc = GetTextureDescription();
-
-    //    desc = desc with
-    //    {
-    //        Usage = Usage.Staging,
-    //        CPUAccessFlags = (uint)CpuAccessFlag.Read,
-    //        MipLevels = 1,
-    //        BindFlags = (uint)BindFlag.None,
-    //    };
-
-    //    return new Texture3D(Device, desc);
-    //}
 }

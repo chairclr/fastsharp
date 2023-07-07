@@ -1,4 +1,7 @@
-﻿using Silk.NET.DXGI;
+﻿using CommunityToolkit.HighPerformance;
+using FastSharp.Shaders;
+using Silk.NET.Direct3D11;
+using Silk.NET.DXGI;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
@@ -8,10 +11,14 @@ public class ImmutableTextureTests
 {
     public Device Device;
 
+    public ComputeShader ComputeShader;
+
     [SetUp]
     public void SetUp()
     {
         Device = new Device();
+
+        ComputeShader = Device.CompileShaderFromFile<ComputeShader>("TextureTests/ComputeShader.hlsl", "CSMain", ShaderProfile.CS5_0);
     }
 
     [TearDown]
@@ -47,24 +54,6 @@ public class ImmutableTextureTests
 
         Assert.Throws<Exception>(() =>
         {
-            texture.MapWrite<Rgba32>();
-        });
-    }
-
-    [Test]
-    public void WriteImmutableTexture1D()
-    {
-        Rgba32[] inputColors = new Rgba32[]
-        {
-            Color.Red, Color.Green,
-            Color.Blue, Color.White
-        };
-
-        using Texture1D<Rgba32> texture = Device.CreateImmutableTexture1D<Rgba32>(Format.FormatR8G8B8A8Unorm, inputColors);
-
-        Assert.Throws<Exception>(() =>
-        {
-            texture.MapWrite<Rgba32>();
         });
     }
 
@@ -80,40 +69,6 @@ public class ImmutableTextureTests
         using Texture2D<Rgba32> texture = Device.CreateImmutableTexture2D<Rgba32>(Format.FormatR8G8B8A8Unorm, 2, 2, colors);
 
         Assert.Pass();
-    }
-
-    [Test]
-    public void ReadImmutableTexture2D()
-    {
-        Rgba32[] inputColors = new Rgba32[]
-        {
-            Color.Red, Color.Green,
-            Color.Blue, Color.White
-        };
-
-        using Texture2D<Rgba32> texture = Device.CreateImmutableTexture2D<Rgba32>(Format.FormatR8G8B8A8Unorm, 2, 2, inputColors);
-
-        Assert.Throws<Exception>(() =>
-        {
-            texture.MapWrite<Rgba32>();
-        });
-    }
-
-    [Test]
-    public void WriteImmutableTexture2D()
-    {
-        Rgba32[] inputColors = new Rgba32[]
-        {
-            Color.Red, Color.Green,
-            Color.Blue, Color.White
-        };
-
-        using Texture2D<Rgba32> texture = Device.CreateImmutableTexture2D<Rgba32>(Format.FormatR8G8B8A8Unorm, 2, 2, inputColors);
-
-        Assert.Throws<Exception>(() =>
-        {
-            texture.MapWrite<Rgba32>();
-        });
     }
 
     [Test]
@@ -133,40 +88,26 @@ public class ImmutableTextureTests
     }
 
     [Test]
-    public void ReadImmutableTexture3D()
+    public void TestInput()
     {
         Rgba32[] inputColors = new Rgba32[]
         {
             Color.Red, Color.Green,
-            Color.Blue, Color.White,
-            Color.Black, Color.White,
-            Color.AliceBlue, Color.BlanchedAlmond
+            Color.Blue, Color.White
         };
 
-        using Texture3D<Rgba32> texture = Device.CreateImmutableTexture3D<Rgba32>(Format.FormatR8G8B8A8Unorm, 2, 2, 2, inputColors);
+        using Texture2D<Rgba32> immutableTexture = Device.CreateImmutableTexture2D<Rgba32>(Format.FormatR8G8B8A8Unorm, 2, 2, inputColors);
+        using Texture2D<Rgba32> rwTexture = Device.CreateRWTexture2D<Rgba32>(Format.FormatR8G8B8A8Unorm, 2, 2);
+        using StagingTexture2D<Rgba32> stagingTexture = Device.CreateStagingTexture2D(rwTexture);
 
-        Assert.Throws<Exception>(() =>
-        {
-            texture.MapWrite<Rgba32>();
-        });
-    }
+        ComputeShader.SetShaderResource(0, immutableTexture);
+        ComputeShader.SetUnorderedAccessResource(0, rwTexture);
+        ComputeShader.Dispatch(1, 1, 1);
 
-    [Test]
-    public void WriteImmutableTexture3D()
-    {
-        Rgba32[] inputColors = new Rgba32[]
-        {
-            Color.Red, Color.Green,
-            Color.Blue, Color.White,
-            Color.Black, Color.White,
-            Color.AliceBlue, Color.BlanchedAlmond
-        };
+        rwTexture.CopyTo(stagingTexture);
 
-        using Texture3D<Rgba32> texture = Device.CreateImmutableTexture3D<Rgba32>(Format.FormatR8G8B8A8Unorm, 2, 2, 2, inputColors);
+        Rgba32[,] values = stagingTexture.Read();
 
-        Assert.Throws<Exception>(() =>
-        {
-            texture.MapWrite<Rgba32>();
-        });
+        Assert.That(values.AsSpan().ToArray(), Is.EquivalentTo(inputColors));
     }
 }

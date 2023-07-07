@@ -5,7 +5,7 @@ using Silk.NET.DXGI;
 
 namespace FastSharp;
 
-public unsafe abstract class Texture : IMappableResource, IDisposable
+public unsafe abstract class Texture : IDisposable
 {
     public readonly Device Device;
 
@@ -113,7 +113,7 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
         Device.GraphicsDeviceContext.CopyResource(texture.GraphicsResource, GraphicsResource);
     }
 
-    public Span<T> MapWrite<T>(int subresource = 0) where T : unmanaged
+    protected Span<T> MapWrite<T>(out int rowPitch, out int depthPitch, int subresource = 0) where T : unmanaged
     {
         if (!Writable)
         {
@@ -134,10 +134,13 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
             throw new Exception("Failed to map subresource");
         }
 
+        rowPitch = (int)mappedSubresource.RowPitch;
+        depthPitch = (int)mappedSubresource.DepthPitch;
+
         return new Span<T>(mappedSubresource.PData, Size);
     }
 
-    public ReadOnlySpan<T> MapRead<T>(int subresource = 0) where T : unmanaged
+    protected ReadOnlySpan<T> MapRead<T>(out int rowPitch, out int depthPitch, int subresource = 0) where T : unmanaged
     {
         if (!Readable)
         {
@@ -158,10 +161,13 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
             throw new Exception("Failed to map subresource", Marshal.GetExceptionForHR(hr));
         }
 
+        rowPitch = (int)mappedSubresource.RowPitch;
+        depthPitch = (int)mappedSubresource.DepthPitch;
+
         return new ReadOnlySpan<T>(mappedSubresource.PData, Size);
     }
 
-    public Span<T> MapReadWrite<T>(int subresource = 0) where T : unmanaged
+    protected Span<T> MapReadWrite<T>(out int rowPitch, out int depthPitch, int subresource = 0) where T : unmanaged
     {
         if (!Readable || !Writable)
         {
@@ -182,18 +188,23 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
             throw new Exception("Failed to map subresource");
         }
 
+        rowPitch = (int)mappedSubresource.RowPitch;
+        depthPitch = (int)mappedSubresource.DepthPitch;
+
         return new Span<T>(mappedSubresource.PData, Size);
     }
 
-    public void WriteData<T>(Span<T> data, int subresource = 0)
+    protected void WriteData<T>(ReadOnlySpan<T> data, int subresource = 0)
         where T : unmanaged
     {
-        data.CopyTo(MapWrite<T>(subresource));
+        Span<T> span = MapWrite<T>(out int rowPitch, out int depthPitch, subresource);
+
+        data.CopyTo(span);
 
         Unmap(subresource);
     }
 
-    public void Unmap(int subresource = 0)
+    protected void Unmap(int subresource = 0)
     {
         if (subresource < 0)
         {

@@ -73,20 +73,17 @@ public unsafe class StagingTexture2D<T> : Texture<ID3D11Texture2D>
         Format = desc.Format;
     }
 
-    //internal Texture2D CreateStagingTexture()
-    //{
-    //    Texture2DDesc desc = GetTextureDescription();
+    public T[,] Read(int subresource = 0)
+    {
+        ReadOnlySpan<T> span = MapRead<T>(out int rowPitch, out _, subresource);
+        ReadOnlySpan2D<T> span2d = new ReadOnlySpan2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Width, Height, rowPitch / Unsafe.SizeOf<T>() - Unsafe.SizeOf<T>() / 2);
 
-    //    desc = desc with
-    //    {
-    //        Usage = Usage.Staging,
-    //        CPUAccessFlags = (uint)CpuAccessFlag.Read,
-    //        MipLevels = 1,
-    //        BindFlags = (uint)BindFlag.None,
-    //        SampleDesc = new SampleDesc(1, 0),
-    //    };
+        T[,] values = new T[Width, Height];
 
+        span2d.CopyTo(values);
 
-    //    return new Texture2D(Device, desc);
-    //}
+        Unmap(subresource);
+
+        return values;
+    }
 }
