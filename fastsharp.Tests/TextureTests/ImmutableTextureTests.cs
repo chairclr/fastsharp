@@ -18,7 +18,7 @@ public class ImmutableTextureTests
     {
         Device = new Device();
 
-        ComputeShader = Device.CompileShaderFromFile<ComputeShader>("TextureTests/ComputeShader.hlsl", "CSMain", ShaderProfile.CS5_0);
+        ComputeShader = Device.CompileShaderFromFile<ComputeShader>("TextureTests/ImmutableComputeShader.hlsl", "CSMain", ShaderProfile.CS5_0);
     }
 
     [TearDown]

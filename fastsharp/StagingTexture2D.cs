@@ -73,10 +73,30 @@ public unsafe class StagingTexture2D<T> : Texture<ID3D11Texture2D>
         Format = desc.Format;
     }
 
+    public void Read(Span2D<T> data, int subresource = 0)
+    {
+        if (data.Width != Width)
+        {
+            throw new ArgumentException($"Width of {nameof(data)} (data.Width = {data.Width}) must be equal to the width of the texture (texture.Width = {Width})", nameof(data));
+        }
+
+        if (data.Height != Height)
+        {
+            throw new ArgumentException($"Height of {nameof(data)} (data.Height = {data.Height}) must be equal to the height of the texture (texture.Height = {Height})", nameof(data));
+        }
+
+        ReadOnlySpan<T> span = MapRead<T>(out int rowPitch, out _, subresource);
+        ReadOnlySpan2D<T> span2d = new ReadOnlySpan2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Width, Height, (rowPitch / Unsafe.SizeOf<T>()) - Width);
+
+        span2d.CopyTo(data);
+
+        Unmap(subresource);
+    }
+
     public T[,] Read(int subresource = 0)
     {
         ReadOnlySpan<T> span = MapRead<T>(out int rowPitch, out _, subresource);
-        ReadOnlySpan2D<T> span2d = new ReadOnlySpan2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Width, Height, rowPitch / Unsafe.SizeOf<T>() - Unsafe.SizeOf<T>() / 2);
+        ReadOnlySpan2D<T> span2d = new ReadOnlySpan2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Width, Height, (rowPitch / Unsafe.SizeOf<T>()) - Width);
 
         T[,] values = new T[Width, Height];
 
@@ -85,5 +105,12 @@ public unsafe class StagingTexture2D<T> : Texture<ID3D11Texture2D>
         Unmap(subresource);
 
         return values;
+    }
+
+    public ReadOnlySpan2D<T> MapRead(int subresource)
+    {
+        ReadOnlySpan<T> span = MapRead<T>(out int rowPitch, out _, subresource);
+
+        return new ReadOnlySpan2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Width, Height, (rowPitch / Unsafe.SizeOf<T>()) - Width);
     }
 }

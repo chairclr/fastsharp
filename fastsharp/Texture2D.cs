@@ -146,23 +146,30 @@ public unsafe class Texture2D<T> : Texture<ID3D11Texture2D>
         Format = desc.Format;
     }
 
-    public void Write(ReadOnlySpan2D<T> values, int subresource = 0)
+    public void Write(ReadOnlySpan2D<T> data, int subresource = 0)
     {
         Span<T> span = MapWrite<T>(out int rowPitch, out _, subresource);
-        Span2D<T> span2d = new Span2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Height, Width, rowPitch / Unsafe.SizeOf<T>() - Unsafe.SizeOf<T>() / 2);
+        Span2D<T> span2d = new Span2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Height, Width, rowPitch / Unsafe.SizeOf<T>() - Width);
 
-        values.CopyTo(span2d);
+        data.CopyTo(span2d);
 
         Unmap();
     }
 
-    public void Write(T[,] values, int subresource = 0)
+    public void Write(T[,] data, int subresource = 0)
     {
         Span<T> span = MapWrite<T>(out int rowPitch, out _, subresource);
-        Span2D<T> span2d = new Span2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Height, Width, rowPitch / Unsafe.SizeOf<T>() - Unsafe.SizeOf<T>() / 2);
+        Span2D<T> span2d = new Span2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Height, Width, rowPitch / Unsafe.SizeOf<T>() - Width);
 
-        values.AsSpan2D().CopyTo(span2d);
+        data.AsSpan2D().CopyTo(span2d);
 
         Unmap();
+    }
+
+    public Span2D<T> MapWrite(int subresource = 0)
+    {
+        Span<T> span = MapWrite<T>(out int rowPitch, out _, subresource);
+
+        return new Span2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Height, Width, rowPitch / Unsafe.SizeOf<T>() - Width);
     }
 }

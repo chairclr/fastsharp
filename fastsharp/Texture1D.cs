@@ -135,4 +135,9 @@ public unsafe class Texture1D<T> : Texture<ID3D11Texture1D>
 
         Unmap();
     }
+
+    public Span<T> MapWrite(int subresource = 0)
+    {
+        return MapWrite<T>(out _, out _, subresource);
+    }
 }

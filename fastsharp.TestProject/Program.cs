@@ -21,23 +21,23 @@ internal class Program
             Thread.Sleep(1000);
         }
 #endif
-        using ComputeShader ComputeShader = Device.CompileShaderFromFile<ComputeShader>("TextureTests/ComputeShader.hlsl", "CSMain", ShaderProfile.CS5_0);
+        //using ComputeShader ComputeShader = Device.CompileShaderFromFile<ComputeShader>("TextureTests/ComputeShader.hlsl", "CSMain", ShaderProfile.CS5_0);
 
-        Rgba32[] inputColors = new Rgba32[]
-        {
-            Color.Red, Color.Green,
-            Color.Blue, Color.White
-        };
+        //Rgba32[] inputColors = new Rgba32[]
+        //{
+        //    Color.Red, Color.Green,
+        //    Color.Blue, Color.White
+        //};
 
-        using Texture2D<Rgba32> immutableTexture = Device.CreateImmutableTexture2D<Rgba32>(Format.FormatR8G8B8A8Unorm, 2, 2, inputColors);
-        using Texture2D<Rgba32> rwTexture = Device.CreateRWTexture2D<Rgba32>(Format.FormatR8G8B8A8Unorm, 2, 2);
-        using StagingTexture2D<Rgba32> stagingTexture = Device.CreateStagingTexture2D(rwTexture);
+        //using Texture2D<Rgba32> immutableTexture = Device.CreateImmutableTexture2D<Rgba32>(Format.FormatR8G8B8A8Unorm, 2, 2, inputColors);
+        //using Texture2D<Rgba32> rwTexture = Device.CreateRWTexture2D<Rgba32>(Format.FormatR8G8B8A8Unorm, 2, 2);
+        //using StagingTexture2D<Rgba32> stagingTexture = Device.CreateStagingTexture2D(rwTexture);
 
-        ComputeShader.SetShaderResource(0, immutableTexture);
-        ComputeShader.SetUnorderedAccessResource(0, rwTexture);
-        ComputeShader.Dispatch(1, 1, 1);
+        //ComputeShader.SetShaderResource(0, immutableTexture);
+        //ComputeShader.SetUnorderedAccessResource(0, rwTexture);
+        //ComputeShader.Dispatch(1, 1, 1);
 
-        rwTexture.CopyTo(stagingTexture);
+        //rwTexture.CopyTo(stagingTexture);
 
         //ReadOnlySpan<Rgba32> values = stagingTexture.MapRead<Rgba32>();
 
@@ -110,13 +110,5 @@ internal class Program
 #endif
 
         Console.Read();
-    }
-
-    private struct TestStruct
-    {
-        public int X;
-        public int Length;
-        int __padding1;
-        int __padding2;
     }
 }

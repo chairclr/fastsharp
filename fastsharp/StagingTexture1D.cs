@@ -65,6 +65,20 @@ public unsafe class StagingTexture1D<T> : Texture<ID3D11Texture1D>
         Format = desc.Format;
     }
 
+    public void Read(Span<T> data, int subresource = 0)
+    {
+        if (data.Length != Length)
+        {
+            throw new ArgumentException($"Length of {nameof(data)} must be equal to length of texture", nameof(data));
+        }
+
+        ReadOnlySpan<T> span = MapRead<T>(out _, out _, subresource);
+
+        span.CopyTo(data);
+
+        Unmap(subresource);
+    }
+
     public T[] Read(int subresource = 0)
     {
         ReadOnlySpan<T> span = MapRead<T>(out _, out _, subresource);
@@ -76,5 +90,10 @@ public unsafe class StagingTexture1D<T> : Texture<ID3D11Texture1D>
         Unmap(subresource);
 
         return values;
+    }
+
+    public ReadOnlySpan<T> MapRead(int subresource = 0)
+    {
+        return MapRead<T>(out _, out _, subresource);
     }
 }

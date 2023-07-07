@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="TextureTests\ComputeShader.hlsl">
+    <None Update="TextureTests\ImmutableComputeShader.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
