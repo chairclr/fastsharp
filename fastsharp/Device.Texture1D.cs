@@ -6,67 +6,39 @@ namespace FastSharp;
 
 public partial class Device
 {
-    //public Texture1D CreateTexture1D(int length, Format format, Usage usage, BindFlag bindFlag, CpuAccessFlag cpuAccessFlag)
-    //{
-    //    return new Texture1D(this, length, format, usage, bindFlag, cpuAccessFlag);
-    //}
+    public Texture1D<T> CreateTexture1D<T>(Format format, int length, bool cpuWritable = false)
+        where T : unmanaged
+    {
+        return new Texture1D<T>(this, format, length, false, cpuWritable);
+    }
 
-    //public Texture1D CreateTexture1D<T>(int length, Format format, Usage usage, BindFlag bindFlag, CpuAccessFlag cpuAccessFlag, ReadOnlySpan<T> initialData)
-    //    where T : unmanaged
-    //{
-    //    return new Texture1D(this, length, MemoryMarshal.AsBytes(initialData), format, usage, bindFlag, cpuAccessFlag);
-    //}
+    public Texture1D<T> CreateTexture1D<T>(Format format, ReadOnlySpan<T> initialData, bool cpuWritable = false)
+        where T : unmanaged
+    {
+        return new Texture1D<T>(this, format, initialData, false, cpuWritable);
+    }
 
-    //public Texture1D CreateRWTexture1D(int length)
-    //{
-    //    return new Texture1D(this, length, bindFlag: BindFlag.UnorderedAccess);
-    //}
+    public RWTexture1D<T> CreateRWTexture1D<T>(Format format, int length)
+        where T : unmanaged
+    {
+        return new RWTexture1D<T>(this, format, length);
+    }
 
-    //public Texture1D CreateRWTexture1D(int length, ReadOnlySpan<Rgba32> data)
-    //{
-    //    return new Texture1D(this, length, MemoryMarshal.AsBytes(data), bindFlag: BindFlag.UnorderedAccess);
-    //}
+    public RWTexture1D<T> CreateRWTexture1D<T>(Format format, ReadOnlySpan<T> initialData)
+        where T : unmanaged
+    {
+        return new RWTexture1D<T>(this, format, initialData);
+    }
 
-    //public Texture1D CreateRWTexture1D<T>(int length, Format format, ReadOnlySpan<T> data)
-    //    where T : unmanaged
-    //{
-    //    return new Texture1D(this, length, MemoryMarshal.AsBytes(data), format: format, bindFlag: BindFlag.UnorderedAccess);
-    //}
+    public Texture1D<T> CreateImmutableTexture1D<T>(Format format, ReadOnlySpan<T> initialData)
+        where T : unmanaged
+    {
+        return new Texture1D<T>(this, format, initialData, true);
+    }
 
-    //public Texture1D CreateShaderResourceTexture1D(int length)
-    //{
-    //    return new Texture1D(this, length, bindFlag: BindFlag.ShaderResource);
-    //}
-
-    //public Texture1D CreateShaderResourceTexture1D(int length, ReadOnlySpan<Rgba32> data)
-    //{
-    //    return new Texture1D(this, length, MemoryMarshal.AsBytes(data), bindFlag: BindFlag.ShaderResource);
-    //}
-
-    //public Texture1D CreateShaderResourceTexture1D<T>(int length, Format format, ReadOnlySpan<T> data)
-    //    where T : unmanaged
-    //{
-    //    return new Texture1D(this, length, MemoryMarshal.AsBytes(data), format: format, bindFlag: BindFlag.ShaderResource);
-    //}
-
-    //public Texture1D CreateImmutableTexture1D(int length, ReadOnlySpan<Rgba32> data)
-    //{
-    //    return new Texture1D(this, length, MemoryMarshal.AsBytes(data), usage: Usage.Immutable, bindFlag: BindFlag.ShaderResource);
-    //}
-
-    //public Texture1D CreateImmutableTexture1D<T>(int length, Format format, ReadOnlySpan<T> data)
-    //    where T : unmanaged
-    //{
-    //    return new Texture1D(this, length, MemoryMarshal.AsBytes(data), format: format, usage: Usage.Immutable, bindFlag: BindFlag.ShaderResource);
-    //}
-
-    ///// <summary>
-    ///// Creates a copy of a <see cref="Texture1D"/> for staging purposes
-    ///// </summary>
-    ///// <param name="target">the texture to create a copy of</param>
-    ///// <returns>A copy of <paramref name="target"/> for use in staging</returns>
-    //public Texture1D CreateStagingCopy(Texture1D target)
-    //{
-    //    return target.CreateStagingTexture();
-    //}
+    public StagingTexture1D<T> CreateStagingTexture1D<T>(Texture1D<T> baseTexture)
+        where T : unmanaged
+    {
+        return new StagingTexture1D<T>(baseTexture);
+    }
 }
