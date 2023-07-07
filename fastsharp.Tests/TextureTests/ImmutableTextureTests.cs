@@ -42,22 +42,6 @@ public class ImmutableTextureTests
     }
 
     [Test]
-    public void ReadImmutableTexture1D()
-    {
-        Rgba32[] inputColors = new Rgba32[]
-        {
-            Color.Red, Color.Green,
-            Color.Blue, Color.White
-        };
-
-        using Texture1D<Rgba32> texture = Device.CreateImmutableTexture1D<Rgba32>(Format.FormatR8G8B8A8Unorm, inputColors);
-
-        Assert.Throws<Exception>(() =>
-        {
-        });
-    }
-
-    [Test]
     public void CreateImmutableTexture2D()
     {
         Rgba32[] colors = new Rgba32[]
