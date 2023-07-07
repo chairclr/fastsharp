@@ -55,9 +55,6 @@ internal unsafe static partial class RenderDocUtil
         }
     }
 
-    [LibraryImport("kernel32.dll", EntryPoint = "GetProcAddress", SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
-    private static partial nint GetProcAddress(nint hModule, string procName);
-
     [StructLayout(LayoutKind.Sequential)]
     internal readonly struct RenderDocAPI
     {
