@@ -75,20 +75,23 @@ public unsafe class StagingTexture2D<T> : Texture<ID3D11Texture2D>
 
     public void Read(Span2D<T> data, int subresource = 0)
     {
-        if (data.Width != Width)
+        if (data.Width != Height)
         {
-            throw new ArgumentException($"Width of {nameof(data)} (data.Width = {data.Width}) must be equal to the width of the texture (texture.Width = {Width})", nameof(data));
+            throw new ArgumentException($"Width of {nameof(data)} (data.Width = {data.Width}) must be equal to the height of the texture (texture.Height = {Height})", nameof(data));
         }
 
-        if (data.Height != Height)
+        if (data.Height != Width)
         {
-            throw new ArgumentException($"Height of {nameof(data)} (data.Height = {data.Height}) must be equal to the height of the texture (texture.Height = {Height})", nameof(data));
+            throw new ArgumentException($"Height of {nameof(data)} (data.Height = {data.Height}) must be equal to the width of the texture (texture.Width = {Width})", nameof(data));
         }
 
         ReadOnlySpan<T> span = MapRead<T>(out int rowPitch, out _, subresource);
         ReadOnlySpan2D<T> span2d = new ReadOnlySpan2D<T>(Unsafe.AsPointer(ref span.DangerousGetReference()), Height, Width, (rowPitch / Unsafe.SizeOf<T>()) - Width);
 
-        span2d.CopyTo(data);
+        for (int x = 0; x < Width; x++)
+        {
+            span2d.GetColumn(x).CopyTo(data.GetRow(x));
+        }
 
         Unmap(subresource);
     }
@@ -100,7 +103,10 @@ public unsafe class StagingTexture2D<T> : Texture<ID3D11Texture2D>
 
         T[,] values = new T[Width, Height];
 
-        span2d.CopyTo(values);
+        for (int x = 0; x < Width; x++)
+        {
+            span2d.GetColumn(x).CopyTo(values.GetRow(x));
+        }
 
         Unmap(subresource);
 
