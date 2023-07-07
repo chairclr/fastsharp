@@ -6,7 +6,8 @@ using Silk.NET.DXGI;
 
 namespace FastSharp;
 
-public unsafe class Texture2D : Texture<ID3D11Texture2D>
+public unsafe class Texture2D<T> : Texture<ID3D11Texture2D>
+    where T : unmanaged
 {
     public int Width { get; private set; } = 0;
 
@@ -14,62 +15,97 @@ public unsafe class Texture2D : Texture<ID3D11Texture2D>
 
     protected override int Size => Width * Height;
 
-    internal Texture2D(Device device, Texture2DDesc desc)
-        : base(device)
+    protected override BindFlag BindFlag => BindFlag.ShaderResource;
+
+    public Texture2D(Device device, Format format, int width, int height, bool immutable = false, bool writable = false)
+        : base(device, immutable, false, writable)
     {
+        if (immutable)
+        {
+            throw new ArgumentException("Cannot create an immutable texture without initial data");
+        }
+
+        if (format == Format.FormatUnknown)
+        {
+            throw new ArgumentOutOfRangeException(nameof(format), "Must provide a known format");
+        }
+
+        if (width < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(width), $"Width must be greater than zero");
+        }
+
+        if (height < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(width), $"Height must be greater than zero");
+        }
+
+        Format = format;
+
+        Width = width;
+
+        Height = height;
+
+        Texture2DDesc desc = new Texture2DDesc()
+        {
+            Width = (uint)Width,
+            Height = (uint)Height,
+            Usage = Usage,
+            ArraySize = 1,
+            BindFlags = (uint)BindFlag,
+            Format = Format,
+            CPUAccessFlags = (uint)CPUAccessFlag,
+            MipLevels = 1,
+            SampleDesc = new SampleDesc(1)
+        };
+
         CacheDescriptionFields(desc);
 
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, (SubresourceData*)null, ref GraphicsTexture));
+
+        CreateView();
     }
 
-    internal Texture2D(Device device, Texture2DDesc desc, ReadOnlySpan<byte> initialData)
-        : base(device)
+    public Texture2D(Device device, Format format, int width, int height, ReadOnlySpan<T> initialData, bool immutable = false, bool writable = false)
+        : base(device, immutable, false, writable)
     {
-        CacheDescriptionFields(desc);
-
-        SubresourceData subresourceData = new SubresourceData()
+        if (format == Format.FormatUnknown)
         {
-            PSysMem = Unsafe.AsPointer(ref initialData.DangerousGetReference())
-        };
+            throw new ArgumentOutOfRangeException(nameof(format), "Must provide a known format");
+        }
 
-        SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, subresourceData, ref GraphicsTexture));
-    }
+        if (width < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(width), $"Width must be greater than zero");
+        }
 
-    public Texture2D(Device device, int width, int height, Format format = Format.FormatR8G8B8A8Unorm, Usage usage = Usage.Default, BindFlag bindFlag = BindFlag.UnorderedAccess, CpuAccessFlag cpuAccessFlag = CpuAccessFlag.None)
-        : base(device)
-    {
+        if (height < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(width), $"Height must be greater than zero");
+        }
+
+        if (initialData.Length != width * height)
+        {
+            throw new ArgumentException($"Length of {nameof(initialData)} must be equal to {nameof(width)} * {nameof(height)}");
+        }
+
+        Format = format;
+
+        Width = width;
+
+        Height = height;
+
         Texture2DDesc desc = new Texture2DDesc()
         {
-            Width = (uint)width,
-            Height = (uint)height,
-            Usage = usage,
-            SampleDesc = new SampleDesc(1, 0),
+            Width = (uint)Width,
+            Height = (uint)Height,
+            Usage = Usage,
             ArraySize = 1,
-            BindFlags = (uint)bindFlag,
-            Format = format,
-            CPUAccessFlags = (uint)cpuAccessFlag,
-            MipLevels = 1
-        };
-
-        CacheDescriptionFields(desc);
-
-        SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, (SubresourceData*)null, ref GraphicsTexture));
-    }
-
-    public Texture2D(Device device, int width, int height, ReadOnlySpan<byte> initialData, Format format = Format.FormatR8G8B8A8Unorm, Usage usage = Usage.Default, BindFlag bindFlag = BindFlag.UnorderedAccess, CpuAccessFlag cpuAccessFlag = CpuAccessFlag.None)
-        : base(device)
-    {
-        Texture2DDesc desc = new Texture2DDesc()
-        {
-            Width = (uint)width,
-            Height = (uint)height,
-            Usage = usage,
-            SampleDesc = new SampleDesc(1, 0),
-            ArraySize = 1,
-            BindFlags = (uint)bindFlag,
-            Format = format,
-            CPUAccessFlags = (uint)cpuAccessFlag,
-            MipLevels = 1
+            BindFlags = (uint)BindFlag,
+            Format = Format,
+            CPUAccessFlags = (uint)CPUAccessFlag,
+            MipLevels = 1,
+            SampleDesc = new SampleDesc(1)
         };
 
         CacheDescriptionFields(desc);
@@ -77,10 +113,17 @@ public unsafe class Texture2D : Texture<ID3D11Texture2D>
         SubresourceData subresourceData = new SubresourceData()
         {
             PSysMem = Unsafe.AsPointer(ref initialData.DangerousGetReference()),
-            SysMemPitch = (uint)Width,
+            SysMemPitch = (uint)Width
         };
 
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture2D(desc, subresourceData, ref GraphicsTexture));
+
+        CreateView();
+    }
+
+    protected override void CreateView()
+    {
+        CreateSRV(D3DSrvDimension.D3D101SrvDimensionTexture2D);
     }
 
     internal Texture2DDesc GetTextureDescription()
@@ -103,20 +146,20 @@ public unsafe class Texture2D : Texture<ID3D11Texture2D>
         Format = desc.Format;
     }
 
-    internal Texture2D CreateStagingTexture()
-    {
-        Texture2DDesc desc = GetTextureDescription();
+    //internal Texture2D CreateStagingTexture()
+    //{
+    //    Texture2DDesc desc = GetTextureDescription();
 
-        desc = desc with
-        {
-            Usage = Usage.Staging,
-            CPUAccessFlags = (uint)CpuAccessFlag.Read,
-            MipLevels = 1,
-            BindFlags = (uint)BindFlag.None,
-            SampleDesc = new SampleDesc(1, 0),
-        };
+    //    desc = desc with
+    //    {
+    //        Usage = Usage.Staging,
+    //        CPUAccessFlags = (uint)CpuAccessFlag.Read,
+    //        MipLevels = 1,
+    //        BindFlags = (uint)BindFlag.None,
+    //        SampleDesc = new SampleDesc(1, 0),
+    //    };
 
 
-        return new Texture2D(Device, desc);
-    }
+    //    return new Texture2D(Device, desc);
+    //}
 }

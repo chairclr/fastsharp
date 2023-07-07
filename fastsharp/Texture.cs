@@ -1,4 +1,5 @@
-﻿using Silk.NET.Core.Native;
+﻿using System.Runtime.InteropServices;
+using Silk.NET.Core.Native;
 using Silk.NET.Direct3D11;
 using Silk.NET.DXGI;
 
@@ -14,96 +15,97 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
 
     protected abstract ComPtr<ID3D11Resource> GraphicsResource { get; }
 
-    protected ComPtr<ID3D11UnorderedAccessView> GraphicsUAVCache;
-    internal ref ComPtr<ID3D11UnorderedAccessView> GraphicsUAV
-    {
-        get
-        {
-            if (GraphicsUAVCache.IsNull())
-            {
-                GraphicsUAVCache = CreateUAV();
-            }
+    public bool Immutable { get; private set; }
 
-            return ref GraphicsUAVCache;
-        }
-    }
+    public bool Readable { get; private set; }
 
-    protected ComPtr<ID3D11ShaderResourceView> GraphicsSRVCache;
-    internal ref ComPtr<ID3D11ShaderResourceView> GraphicsSRV
-    {
-        get
-        {
-            if (GraphicsSRVCache.IsNull())
-            {
-                GraphicsSRVCache = CreateSRV();
-            }
+    public bool Writable { get; private set; }
 
-            return ref GraphicsSRVCache;
-        }
-    }
+    protected virtual Usage Usage => Immutable ? Usage.Immutable : ((Writable && !Readable) ? Usage.Dynamic : Usage.Default);
+
+    protected virtual CpuAccessFlag CPUAccessFlag => (Writable ? CpuAccessFlag.Write : CpuAccessFlag.None) | (Readable ? CpuAccessFlag.Read : CpuAccessFlag.None);
+
+    protected abstract BindFlag BindFlag { get; }
+
+    internal ComPtr<ID3D11UnorderedAccessView> GraphicsUAV;
+
+    internal ComPtr<ID3D11ShaderResourceView> GraphicsSRV;
 
     private bool Disposed;
 
-    public Texture(Device device)
+    public Texture(Device device, bool immutable, bool readable, bool writable)
     {
+        Immutable = immutable;
+
+        Readable = readable;
+
+        Writable = writable;
+
+        if (Immutable && Readable)
+        {
+            throw new ArgumentException("Immutable textures cannot be readable", nameof(readable));
+        }
+
+        if (Immutable && Writable)
+        {
+            throw new ArgumentException("Immutable textures cannot be readable", nameof(writable));
+        }
+
         Device = device;
     }
 
-    private ComPtr<ID3D11UnorderedAccessView> CreateUAV()
+    protected void CreateUAV(UavDimension dimension)
     {
-        ComPtr<ID3D11UnorderedAccessView> accessView = default;
-
-        UnorderedAccessViewDesc unorderedAccessViewDesc = new UnorderedAccessViewDesc()
+        UnorderedAccessViewDesc unorderedAccessViewDesc = new UnorderedAccessViewDesc
         {
-            Format = Format
+            Format = Format,
+            ViewDimension = dimension
         };
 
-        if (this is Texture1D)
+        switch (dimension)
         {
-            unorderedAccessViewDesc.ViewDimension = UavDimension.Texture1D;
-        }
-        else if (this is Texture2D)
-        {
-            unorderedAccessViewDesc.ViewDimension = UavDimension.Texture2D;
-        }
-        else if (this is Texture3D)
-        {
-            unorderedAccessViewDesc.ViewDimension = UavDimension.Texture3D;
+            case UavDimension.Texture1D:
+                break;
+            case UavDimension.Texture2D:
+                break;
+            case UavDimension.Texture3D:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(dimension), "Dimension must be a texture dimension");
         }
 
-        SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateUnorderedAccessView(GraphicsResource, unorderedAccessViewDesc, ref accessView));
-
-        return accessView;
+        SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateUnorderedAccessView(GraphicsResource, unorderedAccessViewDesc, ref GraphicsUAV));
     }
 
-    private ComPtr<ID3D11ShaderResourceView> CreateSRV()
+    protected void CreateSRV(D3DSrvDimension dimension)
     {
-        ComPtr<ID3D11ShaderResourceView> resourceView = default;
-
         ShaderResourceViewDesc shaderResourceViewDesc = new ShaderResourceViewDesc()
         {
             Format = Format,
+            ViewDimension = dimension
         };
 
-        if (this is Texture1D)
+        switch (dimension)
         {
-            shaderResourceViewDesc.ViewDimension = D3DSrvDimension.D3D101SrvDimensionTexture1D;
-            shaderResourceViewDesc.Texture1D.MipLevels = uint.MaxValue;
-        }
-        else if (this is Texture2D)
-        {
-            shaderResourceViewDesc.ViewDimension = D3DSrvDimension.D3D101SrvDimensionTexture2D;
-            shaderResourceViewDesc.Texture2D.MipLevels = uint.MaxValue;
-        }
-        else if (this is Texture3D)
-        {
-            shaderResourceViewDesc.ViewDimension = D3DSrvDimension.D3D101SrvDimensionTexture3D;
-            shaderResourceViewDesc.Texture3D.MipLevels = uint.MaxValue;
+            case D3DSrvDimension.D3DSrvDimensionTexture1D:
+                shaderResourceViewDesc.Texture1D.MipLevels = uint.MaxValue;
+                break;
+            case D3DSrvDimension.D3DSrvDimensionTexture2D:
+                shaderResourceViewDesc.Texture2D.MipLevels = uint.MaxValue;
+                break;
+            case D3DSrvDimension.D3DSrvDimensionTexture3D:
+                shaderResourceViewDesc.Texture3D.MipLevels = uint.MaxValue;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(dimension), "Dimension must be a Texture1D, 2D, or 3D dimension");
         }
 
-        SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateShaderResourceView(GraphicsResource, shaderResourceViewDesc, ref resourceView));
+        SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateShaderResourceView(GraphicsResource, shaderResourceViewDesc, ref GraphicsSRV));
+    }
 
-        return resourceView;
+    protected virtual void CreateView()
+    {
+
     }
 
     public void CopyTo(Texture texture)
@@ -113,6 +115,11 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
 
     public Span<T> MapWrite<T>(int subresource = 0) where T : unmanaged
     {
+        if (!Writable)
+        {
+            throw new Exception("Texture not writable");
+        }
+
         if (subresource < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(subresource), "subresource must be positive");
@@ -132,6 +139,11 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
 
     public ReadOnlySpan<T> MapRead<T>(int subresource = 0) where T : unmanaged
     {
+        if (!Readable)
+        {
+            throw new Exception("Texture not readable");
+        }
+
         if (subresource < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(subresource), "subresource must be positive");
@@ -143,7 +155,7 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
 
         if (!HResult.IndicatesSuccess(hr))
         {
-            throw new Exception("Failed to map subresource");
+            throw new Exception("Failed to map subresource", Marshal.GetExceptionForHR(hr));
         }
 
         return new ReadOnlySpan<T>(mappedSubresource.PData, Size);
@@ -151,6 +163,11 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
 
     public Span<T> MapReadWrite<T>(int subresource = 0) where T : unmanaged
     {
+        if (!Readable || !Writable)
+        {
+            throw new Exception("Texture not read/writable");
+        }
+
         if (subresource < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(subresource), "subresource must be positive");
@@ -190,8 +207,6 @@ public unsafe abstract class Texture : IMappableResource, IDisposable
     {
         if (!Disposed)
         {
-            GraphicsUAVCache.Dispose();
-
             Disposed = true;
         }
     }
@@ -211,8 +226,8 @@ public abstract class Texture<T> : Texture where T : unmanaged, IComVtbl<T>, ICo
 
     private bool Disposed;
 
-    public Texture(Device device)
-        : base(device)
+    public Texture(Device device, bool immutable, bool readable, bool writable)
+        : base(device, immutable, readable, writable)
     {
 
     }

@@ -6,7 +6,8 @@ using Silk.NET.DXGI;
 
 namespace FastSharp;
 
-public unsafe class Texture3D : Texture<ID3D11Texture3D>
+public unsafe class Texture3D<T> : Texture<ID3D11Texture3D>
+    where T : unmanaged
 {
     public int Width { get; private set; } = 0;
 
@@ -16,61 +17,108 @@ public unsafe class Texture3D : Texture<ID3D11Texture3D>
 
     protected override int Size => Width * Height * Depth;
 
-    internal Texture3D(Device device, Texture3DDesc desc)
-        : base(device)
+    protected override BindFlag BindFlag => BindFlag.ShaderResource;
+
+    public Texture3D(Device device, Format format, int width, int height, int depth, bool immutable = false, bool writable = false)
+        : base(device, immutable, false, writable)
     {
-        CacheDescriptionFields(desc);
-
-        SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture3D(desc, (SubresourceData*)null, ref GraphicsTexture));
-    }
-
-    internal Texture3D(Device device, Texture3DDesc desc, ReadOnlySpan<byte> initialData)
-        : base(device)
-    {
-        CacheDescriptionFields(desc);
-
-        SubresourceData subresourceData = new SubresourceData()
+        if (immutable)
         {
-            PSysMem = Unsafe.AsPointer(ref initialData.DangerousGetReference()),
-            SysMemPitch = (uint)Width,
-            SysMemSlicePitch = (uint)Height,
-        };
+            throw new ArgumentException("Cannot create an immutable texture without initial data");
+        }
 
-        SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture3D(desc, subresourceData, ref GraphicsTexture));
-    }
+        if (format == Format.FormatUnknown)
+        {
+            throw new ArgumentOutOfRangeException(nameof(format), "Must provide a known format");
+        }
 
-    public Texture3D(Device device, int width, int height, int depth, Format format = Format.FormatR8G8B8A8Unorm, Usage usage = Usage.Default, BindFlag bindFlag = BindFlag.UnorderedAccess, CpuAccessFlag cpuAccessFlag = CpuAccessFlag.None)
-        : base(device)
-    {
+        if (width < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(width), $"Width must be greater than zero");
+        }
+
+        if (height < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(width), $"Height must be greater than zero");
+        }
+
+        if (depth < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(depth), $"Depth must be greater than zero");
+        }
+
+        Format = format;
+
+        Width = width;
+
+        Height = height;
+
+        Depth = depth;
+
         Texture3DDesc desc = new Texture3DDesc()
         {
-            Width = (uint)width,
-            Height = (uint)height,
-            Depth = (uint)depth,
-            Usage = usage,
-            BindFlags = (uint)bindFlag,
-            Format = format,
-            CPUAccessFlags = (uint)cpuAccessFlag,
+            Width = (uint)Width,
+            Height = (uint)Height,
+            Depth = (uint)Depth,
+            Usage = Usage,
+            BindFlags = (uint)BindFlag,
+            Format = Format,
+            CPUAccessFlags = (uint)CPUAccessFlag,
             MipLevels = 1
         };
 
         CacheDescriptionFields(desc);
 
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture3D(desc, (SubresourceData*)null, ref GraphicsTexture));
+
+        CreateView();
     }
 
-    public Texture3D(Device device, int width, int height, int depth, ReadOnlySpan<byte> initialData, Format format = Format.FormatR8G8B8A8Unorm, Usage usage = Usage.Default, BindFlag bindFlag = BindFlag.UnorderedAccess, CpuAccessFlag cpuAccessFlag = CpuAccessFlag.None)
-        : base(device)
+    public Texture3D(Device device, Format format, int width, int height, int depth, ReadOnlySpan<T> initialData, bool immutable = false, bool writable = false)
+        : base(device, immutable, false, writable)
     {
+        if (format == Format.FormatUnknown)
+        {
+            throw new ArgumentOutOfRangeException(nameof(format), "Must provide a known format");
+        }
+        
+        if (width < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(width), $"Width must be greater than zero");
+        }
+
+        if (height < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(height), $"Height must be greater than zero");
+        }
+
+        if (depth < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(depth), $"Depth must be greater than zero");
+        }
+
+        if (initialData.Length != width * height * depth)
+        {
+            throw new ArgumentException($"Length of {nameof(initialData)} must be equal to the size of the texture (Width * Height)", nameof(initialData));
+        }
+
+        Format = format;
+
+        Width = width;
+
+        Height = height;
+
+        Depth = depth;
+
         Texture3DDesc desc = new Texture3DDesc()
         {
-            Width = (uint)width,
-            Height = (uint)height,
-            Depth = (uint)depth,
-            Usage = usage,
-            BindFlags = (uint)bindFlag,
-            Format = format,
-            CPUAccessFlags = (uint)cpuAccessFlag,
+            Width = (uint)Width,
+            Height = (uint)Height,
+            Depth = (uint)Depth,
+            Usage = Usage,
+            BindFlags = (uint)BindFlag,
+            Format = Format,
+            CPUAccessFlags = (uint)CPUAccessFlag,
             MipLevels = 1
         };
 
@@ -79,11 +127,17 @@ public unsafe class Texture3D : Texture<ID3D11Texture3D>
         SubresourceData subresourceData = new SubresourceData()
         {
             PSysMem = Unsafe.AsPointer(ref initialData.DangerousGetReference()),
-            SysMemPitch = (uint)Width,
-            SysMemSlicePitch = (uint)Height,
+            SysMemPitch = (uint)Width
         };
 
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture3D(desc, subresourceData, ref GraphicsTexture));
+
+        CreateView();
+    }
+
+    protected override void CreateView()
+    {
+        CreateSRV(D3DSrvDimension.D3D101SrvDimensionTexture3D);
     }
 
     internal Texture3DDesc GetTextureDescription()
@@ -108,18 +162,18 @@ public unsafe class Texture3D : Texture<ID3D11Texture3D>
         Format = desc.Format;
     }
 
-    internal Texture3D CreateStagingTexture()
-    {
-        Texture3DDesc desc = GetTextureDescription();
+    //internal Texture3D CreateStagingTexture()
+    //{
+    //    Texture3DDesc desc = GetTextureDescription();
 
-        desc = desc with
-        {
-            Usage = Usage.Staging,
-            CPUAccessFlags = (uint)CpuAccessFlag.Read,
-            MipLevels = 1,
-            BindFlags = (uint)BindFlag.None,
-        };
+    //    desc = desc with
+    //    {
+    //        Usage = Usage.Staging,
+    //        CPUAccessFlags = (uint)CpuAccessFlag.Read,
+    //        MipLevels = 1,
+    //        BindFlags = (uint)BindFlag.None,
+    //    };
 
-        return new Texture3D(Device, desc);
-    }
+    //    return new Texture3D(Device, desc);
+    //}
 }
