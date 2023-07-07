@@ -194,16 +194,6 @@ public unsafe abstract class Texture : IDisposable
         return new Span<T>(mappedSubresource.PData, Size);
     }
 
-    protected void WriteData<T>(ReadOnlySpan<T> data, int subresource = 0)
-        where T : unmanaged
-    {
-        Span<T> span = MapWrite<T>(out int rowPitch, out int depthPitch, subresource);
-
-        data.CopyTo(span);
-
-        Unmap(subresource);
-    }
-
     protected void Unmap(int subresource = 0)
     {
         if (subresource < 0)
