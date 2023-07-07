@@ -36,6 +36,14 @@ internal class Program
 
         using RWTexture1D<Rgba32> cool1DTexture = new RWTexture1D<Rgba32>(device, Format.FormatR8G8B8A8Unorm, 2048);
 
+        TestStruct[] coolStructs = new TestStruct[1024];
+
+        for (int i = 0; i < coolStructs.Length; i++)
+        {
+            coolStructs[i].Length = Random.Shared.Next(0, 10);
+            coolStructs[i].X = Random.Shared.Next(0, 3);
+        }
+
         using RWStructuredBuffer<TestStruct> structuredBuffer = new RWStructuredBuffer<TestStruct>(device, coolStructs, false, false);
 
         Vector4[] values = new Vector4[] { new Vector4(0f), new Vector4(1f) };
