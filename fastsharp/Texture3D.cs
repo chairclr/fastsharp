@@ -127,7 +127,8 @@ public unsafe class Texture3D<T> : Texture<ID3D11Texture3D>
         SubresourceData subresourceData = new SubresourceData()
         {
             PSysMem = Unsafe.AsPointer(ref initialData.DangerousGetReference()),
-            SysMemPitch = (uint)Width
+            SysMemPitch = (uint)Width,
+            SysMemSlicePitch = (uint)Height,
         };
 
         SilkMarshal.ThrowHResult(Device.GraphicsDevice.CreateTexture3D(desc, subresourceData, ref GraphicsTexture));
