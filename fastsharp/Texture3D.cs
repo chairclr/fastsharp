@@ -81,7 +81,7 @@ public unsafe class Texture3D<T> : Texture<ID3D11Texture3D>
         {
             throw new ArgumentOutOfRangeException(nameof(format), "Must provide a known format");
         }
-        
+
         if (width < 1)
         {
             throw new ArgumentOutOfRangeException(nameof(width), $"Width must be greater than zero");

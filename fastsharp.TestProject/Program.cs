@@ -1,10 +1,4 @@
-﻿using System.Numerics;
-using FastSharp.Shaders;
-using Silk.NET.DXGI;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-
-namespace FastSharp.TestProject;
+﻿namespace FastSharp.TestProject;
 
 internal class Program
 {

@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using CommunityToolkit.HighPerformance;
-using CommunityToolkit.HighPerformance.Helpers;
-using FastSharp.Shaders;
+﻿using CommunityToolkit.HighPerformance;
 using Silk.NET.DXGI;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
