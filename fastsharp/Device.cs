@@ -11,6 +11,12 @@ public partial class Device : IDisposable
 
     internal ComPtr<ID3D11DeviceContext> GraphicsDeviceContext;
 
+#if DEBUG
+    private Task DebugInfoQueueTask;
+
+    private CancellationTokenSource DebugInfoQueueCancellationTokenSource;
+#endif
+
     private bool Disposed;
 
     public unsafe Device()
@@ -37,7 +43,9 @@ public partial class Device : IDisposable
         );
 
 #if DEBUG
-        GraphicsDevice.SetInfoQueueCallback(x =>
+        DebugInfoQueueCancellationTokenSource = new CancellationTokenSource();
+
+        DebugInfoQueueTask = GraphicsDevice.SetInfoQueueCallback(x =>
         {
             switch (x.Severity)
             {
@@ -57,7 +65,7 @@ public partial class Device : IDisposable
             Console.WriteLine($"[{x.Severity}] {SilkMarshal.PtrToString((nint)x.PDescription)}");
 
             Console.ResetColor();
-        });
+        }, DebugInfoQueueCancellationTokenSource.Token);
 #endif
     }
 
@@ -65,9 +73,13 @@ public partial class Device : IDisposable
     {
         if (!Disposed)
         {
+            DebugInfoQueueCancellationTokenSource.Cancel();
+
             GraphicsDeviceContext.Dispose();
 
             GraphicsDevice.Dispose();
+
+            DebugInfoQueueTask.Wait();
 
             Disposed = true;
         }
