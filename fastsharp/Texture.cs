@@ -31,6 +31,8 @@ public unsafe abstract class Texture : IDisposable
 
     internal ComPtr<ID3D11ShaderResourceView> GraphicsSRV;
 
+    public bool Mapped { get; protected set; }
+
     private bool Disposed;
 
     public Texture(Device device, bool immutable, bool readable, bool writable)
@@ -125,6 +127,11 @@ public unsafe abstract class Texture : IDisposable
             throw new ArgumentOutOfRangeException(nameof(subresource), "subresource must be positive");
         }
 
+        if (Mapped)
+        {
+            throw new InvalidOperationException("Cannot map an already mapped resource");
+        }
+
         MappedSubresource mappedSubresource = default;
 
         int hr = Device.GraphicsDeviceContext.Map(GraphicsResource, (uint)subresource, Map.WriteDiscard, 0, ref mappedSubresource);
@@ -133,6 +140,8 @@ public unsafe abstract class Texture : IDisposable
         {
             throw new Exception("Failed to map subresource");
         }
+
+        Mapped = true;
 
         rowPitch = (int)mappedSubresource.RowPitch;
         depthPitch = (int)mappedSubresource.DepthPitch;
@@ -152,6 +161,11 @@ public unsafe abstract class Texture : IDisposable
             throw new ArgumentOutOfRangeException(nameof(subresource), "subresource must be positive");
         }
 
+        if (Mapped)
+        {
+            throw new InvalidOperationException("Cannot map an already mapped resource");
+        }
+
         MappedSubresource mappedSubresource = default;
 
         int hr = Device.GraphicsDeviceContext.Map(GraphicsResource, (uint)subresource, Map.Read, 0, ref mappedSubresource);
@@ -160,6 +174,8 @@ public unsafe abstract class Texture : IDisposable
         {
             throw new Exception("Failed to map subresource", Marshal.GetExceptionForHR(hr));
         }
+
+        Mapped = true;
 
         rowPitch = (int)mappedSubresource.RowPitch;
         depthPitch = (int)mappedSubresource.DepthPitch;
@@ -179,6 +195,11 @@ public unsafe abstract class Texture : IDisposable
             throw new ArgumentOutOfRangeException(nameof(subresource), "subresource must be positive");
         }
 
+        if (Mapped)
+        {
+            throw new InvalidOperationException("Cannot map an already mapped resource");
+        }
+
         MappedSubresource mappedSubresource = default;
 
         int hr = Device.GraphicsDeviceContext.Map(GraphicsResource, (uint)subresource, Map.ReadWrite, 0, ref mappedSubresource);
@@ -188,18 +209,27 @@ public unsafe abstract class Texture : IDisposable
             throw new Exception("Failed to map subresource");
         }
 
+        Mapped = true;
+
         rowPitch = (int)mappedSubresource.RowPitch;
         depthPitch = (int)mappedSubresource.DepthPitch;
 
         return new Span<T>(mappedSubresource.PData, Size);
     }
 
-    protected void Unmap(int subresource = 0)
+    public void Unmap(int subresource = 0)
     {
         if (subresource < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(subresource), "subresource must be positive");
         }
+
+        if (!Mapped)
+        {
+            throw new InvalidOperationException("Cannot unmap a non-mapped resource");
+        }
+
+        Mapped = false;
 
         Device.GraphicsDeviceContext.Unmap(GraphicsResource, (uint)subresource);
     }

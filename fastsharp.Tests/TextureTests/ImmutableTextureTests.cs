@@ -13,7 +13,7 @@ public class ImmutableTextureTests
 
     public ComputeShader ComputeShader;
 
-    [SetUp]
+    [OneTimeSetUp]
     public void SetUp()
     {
         Device = new Device();
@@ -21,7 +21,7 @@ public class ImmutableTextureTests
         ComputeShader = Device.CompileShaderFromFile<ComputeShader>("TextureTests/ImmutableComputeShader.hlsl", "CSMain", ShaderProfile.CS5_0);
     }
 
-    [TearDown]
+    [OneTimeTearDown]
     public void TearDown()
     {
         Device.Dispose();

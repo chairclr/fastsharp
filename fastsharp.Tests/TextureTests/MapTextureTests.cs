@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.HighPerformance;
+using CommunityToolkit.HighPerformance.Helpers;
 using FastSharp.Shaders;
 using Silk.NET.DXGI;
 using SixLabors.ImageSharp;
@@ -39,13 +40,13 @@ public class MapTextureTests
     public Rgba32[] Texture1DInitialData32 => Texture1DInitialData.Select(x => x.ToPixel<Rgba32>()).ToArray();
     public Rgba64[] Texture1DInitialData64 => Texture1DInitialData.Select(x => x.ToPixel<Rgba64>()).ToArray();
 
-    [SetUp]
+    [OneTimeSetUp]
     public void SetUp()
     {
         Device = new Device();
     }
 
-    [TearDown]
+    [OneTimeTearDown]
     public void TearDown()
     {
         Device.Dispose();
@@ -213,5 +214,101 @@ public class MapTextureTests
         ReadOnlySpan2D<Rgba64> readValues = texture.MapRead();
 
         Assert.That(readValues.ToArray(), Is.EquivalentTo(Texture2DInitialData64));
+    }
+
+    [Test]
+    public void TestMapWrite1D()
+    {
+        using Texture1D<Rgba32> texture = Device.CreateTexture1D<Rgba32>(Format.FormatR8G8B8A8Unorm, Texture1DInitialData32.Length, cpuWritable: true);
+        using StagingTexture1D<Rgba32> stagingTexture = Device.CreateStagingTexture1D(texture);
+
+        texture.Write(Texture1DInitialData32);
+
+        texture.CopyTo(stagingTexture);
+
+        Assert.That(stagingTexture.Read(), Is.EquivalentTo(Texture1DInitialData32));
+    }
+
+    [Test]
+    public void TestMapWriteFails1D()
+    {
+        using Texture1D<Rgba32> unwritableTexture = Device.CreateTexture1D<Rgba32>(Format.FormatR8G8B8A8Unorm, 256);
+        using Texture1D<Rgba32> writableTexture = Device.CreateTexture1D<Rgba32>(Format.FormatR8G8B8A8Unorm, 256, cpuWritable: true);
+
+        Assert.Multiple(() =>
+        {
+            Assert.Throws<Exception>(() =>
+            {
+                unwritableTexture.MapWrite();
+            });
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                writableTexture.MapWrite();
+
+                try
+                {
+                    writableTexture.MapWrite();
+                }
+                finally
+                {
+                    writableTexture.Unmap();
+                }
+            });
+
+            // Should be unmapped at this point
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                writableTexture.Unmap();
+            });
+        });
+    }
+
+    [Test]
+    public void TestMapWrite2D()
+    {
+        using Texture2D<Rgba32> texture = Device.CreateTexture2D<Rgba32>(Format.FormatR8G8B8A8Unorm, Texture2DWidth, Texture2DHeight, cpuWritable: true);
+        using StagingTexture2D<Rgba32> stagingTexture = Device.CreateStagingTexture2D(texture);
+
+        texture.Write(Texture2DInitialData32.AsSpan().AsSpan2D(Texture2DHeight, Texture2DWidth));
+
+        texture.CopyTo(stagingTexture);
+
+        Assert.That(stagingTexture.Read(), Is.EquivalentTo(Texture2DInitialData32));
+    }
+
+    [Test]
+    public void TestMapWriteFails2D()
+    {
+        using Texture2D<Rgba32> unwritableTexture = Device.CreateTexture2D<Rgba32>(Format.FormatR8G8B8A8Unorm, 32, 32);
+        using Texture2D<Rgba32> writableTexture = Device.CreateTexture2D<Rgba32>(Format.FormatR8G8B8A8Unorm, 32, 32, cpuWritable: true);
+
+        Assert.Multiple(() =>
+        {
+            Assert.Throws<Exception>(() =>
+            {
+                unwritableTexture.MapWrite();
+            });
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                writableTexture.MapWrite();
+
+                try
+                {
+                    writableTexture.MapWrite();
+                }
+                finally
+                {
+                    writableTexture.Unmap();
+                }
+            });
+
+            // Should be unmapped at this point
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                writableTexture.Unmap();
+            });
+        });
     }
 }
