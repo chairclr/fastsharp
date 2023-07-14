@@ -22,6 +22,9 @@
     <None Update="Shaders\TestComputeShader.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="TextureTests\ComputeShader.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

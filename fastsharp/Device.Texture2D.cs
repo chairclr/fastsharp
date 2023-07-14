@@ -1,72 +1,42 @@
-﻿using System.Runtime.InteropServices;
-using Silk.NET.Direct3D11;
-using Silk.NET.DXGI;
+﻿using Silk.NET.DXGI;
 
 namespace FastSharp;
 
 public partial class Device
 {
-    public Texture2D CreateTexture2D(int width, int height, Format format, Usage usage, BindFlag bindFlag, CpuAccessFlag cpuAccessFlag)
-    {
-        return new Texture2D(this, width, height, format, usage, bindFlag, cpuAccessFlag);
-    }
-
-    public Texture2D CreateTexture2D<T>(int width, int height, Format format, Usage usage, BindFlag bindFlag, CpuAccessFlag cpuAccessFlag, ReadOnlySpan<T> initialData)
+    public Texture2D<T> CreateTexture2D<T>(Format format, int width, int height, bool cpuWritable = false)
         where T : unmanaged
     {
-        return new Texture2D(this, width, height, MemoryMarshal.AsBytes(initialData), format, usage, bindFlag, cpuAccessFlag);
+        return new Texture2D<T>(this, format, width, height, false, cpuWritable);
     }
 
-    public Texture2D CreateRWTexture2D(int width, int height)
-    {
-        return new Texture2D(this, width, height, bindFlag: BindFlag.UnorderedAccess);
-    }
-
-    public Texture2D CreateRWTexture2D(int width, int height, ReadOnlySpan<Rgba32> data)
-    {
-        return new Texture2D(this, width, height, MemoryMarshal.AsBytes(data), bindFlag: BindFlag.UnorderedAccess);
-    }
-
-    public Texture2D CreateRWTexture2D<T>(int width, int height, Format format, ReadOnlySpan<T> data)
+    public Texture2D<T> CreateTexture2D<T>(Format format, int width, int height, ReadOnlySpan<T> initialData, bool cpuWritable = false)
         where T : unmanaged
     {
-        return new Texture2D(this, width, height, MemoryMarshal.AsBytes(data), format: format, bindFlag: BindFlag.UnorderedAccess);
+        return new Texture2D<T>(this, format, width, height, initialData, false, cpuWritable);
     }
 
-    public Texture2D CreateShaderResourceTexture2D(int width, int height)
-    {
-        return new Texture2D(this, width, height, bindFlag: BindFlag.ShaderResource);
-    }
-
-    public Texture2D CreateShaderResourceTexture2D(int width, int height, ReadOnlySpan<Rgba32> data)
-    {
-        return new Texture2D(this, width, height, MemoryMarshal.AsBytes(data), bindFlag: BindFlag.ShaderResource);
-    }
-
-    public Texture2D CreateShaderResourceTexture2D<T>(int width, int height, Format format, ReadOnlySpan<T> data)
+    public RWTexture2D<T> CreateRWTexture2D<T>(Format format, int width, int height)
         where T : unmanaged
     {
-        return new Texture2D(this, width, height, MemoryMarshal.AsBytes(data), format: format, bindFlag: BindFlag.ShaderResource);
+        return new RWTexture2D<T>(this, format, width, height);
     }
 
-    public Texture2D CreateImmutableTexture2D(int width, int height, ReadOnlySpan<Rgba32> data)
-    {
-        return new Texture2D(this, width, height, MemoryMarshal.AsBytes(data), usage: Usage.Immutable, bindFlag: BindFlag.ShaderResource);
-    }
-
-    public Texture2D CreateImmutableTexture2D<T>(int width, int height, Format format, ReadOnlySpan<T> data)
+    public RWTexture2D<T> CreateRWTexture2D<T>(Format format, int width, int height, ReadOnlySpan<T> initialData)
         where T : unmanaged
     {
-        return new Texture2D(this, width, height, MemoryMarshal.AsBytes(data), format: format, usage: Usage.Immutable, bindFlag: BindFlag.ShaderResource);
+        return new RWTexture2D<T>(this, format, width, height, initialData);
     }
 
-    /// <summary>
-    /// Creates a copy of a <see cref="Texture2D"/> for staging purposes
-    /// </summary>
-    /// <param name="target">the texture to create a copy of</param>
-    /// <returns>A copy of <paramref name="target"/> for use in staging</returns>
-    public Texture2D CreateStagingCopy(Texture2D target)
+    public Texture2D<T> CreateImmutableTexture2D<T>(Format format, int width, int height, ReadOnlySpan<T> initialData)
+        where T : unmanaged
     {
-        return target.CreateStagingTexture();
+        return new Texture2D<T>(this, format, width, height, initialData, true);
+    }
+
+    public StagingTexture2D<T> CreateStagingTexture2D<T>(Texture2D<T> baseTexture)
+        where T : unmanaged
+    {
+        return new StagingTexture2D<T>(baseTexture);
     }
 }

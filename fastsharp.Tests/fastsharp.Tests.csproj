@@ -24,4 +24,10 @@
     <ProjectReference Include="..\fastsharp\fastsharp.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="TextureTests\ImmutableComputeShader.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

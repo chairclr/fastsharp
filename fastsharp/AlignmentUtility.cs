@@ -2,7 +2,7 @@
 
 namespace FastSharp;
 
-internal class AlignmentUtility
+internal static class AlignmentUtility
 {
     public static T Align<T>(T value, T alignment)
         where T : IBinaryInteger<T>

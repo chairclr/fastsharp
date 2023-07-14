@@ -9,7 +9,7 @@ public class DeviceCreationTests
         {
 
         }
-        
+
         Assert.Pass();
     }
 }
