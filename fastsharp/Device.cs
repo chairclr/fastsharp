@@ -73,13 +73,17 @@ public partial class Device : IDisposable
     {
         if (!Disposed)
         {
+#if DEBUG
             DebugInfoQueueCancellationTokenSource.Cancel();
+#endif
 
             GraphicsDeviceContext.Dispose();
 
             GraphicsDevice.Dispose();
 
+#if DEBUG
             DebugInfoQueueTask.Wait();
+#endif
 
             Disposed = true;
         }
